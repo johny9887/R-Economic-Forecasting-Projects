@@ -1,0 +1,501 @@
+---
+title: "Economic Forecasting - Project 3"
+author: "Jonghyuk Lee - 214762017"
+output: html_document
+fontsize: 12pt
+---
+
+#### Executive Summary: First part of analysis uses Domino's Quarterly Sales data from 2002 Q1 - 2019 Q3, of which 80% of data were used for training and 20% of data used for testing the forecast accuracy. This report compares the forecast accuracy of different methods (TSLM, ETS, ARIMA, STL, RW with Drift) and determines the best forecasting method. Second part of analysis uses Hasbro's Quartlery Sales data where different methods (TSLM, ETS, ARIMA, STL, RW with Drift) were compared using the  accuracy metrircs, mainly MSE, to determine the model with best fit for each forecst period. 
+
+
+
+### 1) Using 80% of the data for training and 20% of the data for testing in Domino's Quarterly Sales Data. 
+
+###a)	Compare the forecast accuracy of TSLM (seasonal and trend), ETS, STL, ARIMA, and RW with drift. Which model fits the best? 
+
+#### First, the applicable packages must be loaded
+```{r message=FALSE}
+options(warn=-1)
+library(fpp2)
+library(knitr)
+```
+
+#### Import the dataset for Hasbro Quarterly Sales Data used in Assignment 1 - Question #1
+```{r}
+HAS_quarterly_financial_data <- read.csv("C:/Users/John/Desktop/ECON 4210/Assignment 1/HAS_quarterly_financial_data.csv")
+View(HAS_quarterly_financial_data)
+```
+
+#### Rename the data for convenience ( HQS = Hasbro Quarterly Sales)
+```{r}
+HQS = HAS_quarterly_financial_data
+```
+
+#### Define the data set as time series for R 
+```{r}
+HQS = ts(HAS_quarterly_financial_data, start=2003, frequency=4)
+View(HQS)
+```
+
+#### Create a named variable  
+```{r}
+y = HQS[,"HAS"]
+```
+
+#### Create a Quarterly Sales Time Series plot to visualize data
+```{r}
+autoplot(y) + geom_line(col="black", size=2) + 
+  ggtitle("Hasbro Quarterly sales (millions $)") +
+  labs(y="Millions of USD",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+```
+
+#### Now, the data ranges for training and testing must be defined. For training purposes, 80% of the data will be used, which is 54 observations spanning from 2003 Q1 - 2016 Q2. Then, 20% of the data will be used for testing purposes, which is 13 observations spanning rom 2016 Q3 - 2019 Q3.
+```{r}
+train <- window(y,start=c(2003, 1),end=c(2016, 2))
+plot (train)
+
+test <- window(y, start=c(2016,3),end=c(2019, 3))
+both <- window(y,start=c(2003, 1))
+h=length(test)
+```
+
+### Now, each model must be applied to the training set above. Then, each model will be forecasted to compare the accuracy between the models.
+
+#### TLSM
+```{r}
+fit.tslm <- tslm(train ~ trend + season)
+fcast1 <- forecast(fit.tslm, h=h)
+```
+
+#### ETS
+```{r}
+fit.ets <- ets(train, model="ZZZ")
+fcast2 <- forecast(fit.ets, h=h)
+```
+
+#### STL
+```{r}
+fit.stl <- stl(train, t.window=15, s.window="periodic", robust=TRUE)
+fcast3 <- forecast(fit.stl, method="rwdrift",h=h)
+```
+
+#### ARIMA
+```{r}
+fit.arima <- auto.arima(train)
+fcast4 <- forecast(fit.arima, h=h)
+```
+
+#### RW with drift
+```{r}
+fcast5 <- rwf(train, h=h, drift=TRUE)
+```
+
+#### Now that forecast using each of the models are generated, the accuracy of each forecast models will be compared. To do so, number of accuracy measures will be calculated, with the models being ordered by the MASE accruacy figure
+```{r}
+a1 = accuracy(fcast1, test)
+a2 = accuracy(fcast2, test)
+a3 = accuracy(fcast3, test)
+a4 = accuracy(fcast4, test)
+a5 = accuracy(fcast5, test)
+
+a.table<-rbind(a1, a2, a3, a4, a5)
+
+row.names(a.table)<-c('TSLM training', 'TSLM test', 'ETS training', 'ETS test', 'STL training', 'STL test', 'ARIMA training', 'ARIMA test', 'RWD training', 'RWD test' )
+
+a.table<-as.data.frame(a.table)
+a.table<-a.table[order(a.table$MASE),]
+a.table
+```
+
+#### 1 a) Analysis
+From the accuracy measure table above, its clear that the ARIMA model has the highest accuracy/best fits the training set data for the Hasbro Quarterly Sales Data. This is evident from the fact that ARIMA model has produced the lowest MASE value of 0.6890539 when compared to other model/methods. Its also worth noting that ARIMA model has the lowest values for RMSE, MAE, and MAPE accuracy metrics. While its clear that ARIMA model is the best fitting model for the training data set, ETS model follows the ARIMA model as the second best fitting model, and STL model being third based on the MASE values. 
+
+The story is different for the test set as the model that best fits the test sets range of observations is the ETS model/method. This is due to the fact that ETS method has the lowest MASE value at 1.5628259 for test set data, and the lowest RMSE, MAE, MAPE accuracy measures for the test set. The second best fitting model for the test set is the ARIMA method as it has the second lowest values for the 4 accuracy metrics mentioned previously. 
+
+For the worst fitting models, the accuracy table above indicates that the worst fitting model for both training set and test set is random walk with drift method. This is due to the fact that RWD generated the highest values in the 4 error metrics RMSE, MAE, MAPE, and MASE. 
+
+## Plots of actual values and forecast (includes the actual forecast values below the graph) 
+
+### Creating plots for each model, containing actual values with forecasted values for each model
+```{r}
+plot1 = autoplot(y) + autolayer(test) + autolayer(fcast1, series="TSLM", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Hasbro Quarterly Sales Forecasts-TSLM") + guides(colour=guide_legend(title="Legend"))
+plot2 = autoplot(y) + autolayer(test) + autolayer(fcast2, series="ETS", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Hasbro Quarterly Sales Forecasts-ETS") + guides(colour=guide_legend(title="Legend"))
+plot3 = autoplot(y) + autolayer(test) + autolayer(fcast2, series="STL", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Hasbro Quarterly Sales Forecasts-STL") + guides(colour=guide_legend(title="Legend"))
+plot4 = autoplot(y) + autolayer(test) + autolayer(fcast3, series="ARIMA", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Hasbro Quarterly Sales Forecasts-ARIMA") + guides(colour=guide_legend(title="Legend"))
+plot5 = autoplot(y) + autolayer(test) + autolayer(fcast4, series="RWD", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Hasbro Quarterly Sales Forecasts-RWD") + guides(colour=guide_legend(title="Legend"))
+```
+
+#### Displaying the plots for TLSM, ETS
+```{r}
+gridExtra::grid.arrange(plot1, plot2, nrow =2)
+```
+
+#### Displaying the plots for STL, ARIMA
+```{r}
+gridExtra::grid.arrange(plot3, plot4, nrow =2)
+```
+
+#### Displaying the plots for RW with Drift
+```{r}
+gridExtra::grid.arrange(plot5, nrow =1)
+```
+
+### Actual forecast values for each method
+
+#### TLSM Forecast Values
+```{r}
+forecast(fcast1)
+```
+
+#### ETS Forecast Values
+```{r}
+forecast(fcast2)
+```
+
+#### STL Forecast Values
+```{r}
+forecast(fcast3)
+```
+
+#### ARIMA Forecast Values
+```{r}
+forecast(fcast4)
+```
+
+#### RW with Drift Forecast Values
+```{r}
+forecast(fcast5)
+```
+
+#### Analysis of the forecasted plots and values
+Through observation of the plots from forecast and the actual forecasted values of each method, its apparent that the Random Walk with Drift method produces forecasts that difer significantly fom the actual test set values. This observation is consistent with the analysis in the previous section where RWD method provided the worst fit for test and training sets as it produced the highest error values. In addition, graphs showing ETS and ARIMA models seems to produce fits to test data that resemble each other. While they might look similar, its important to note from the previous analysis that ETS method produces a better fit to test data when compared to ARIMA model. 
+
+In general, the models TSLM, ETS, STL, ARIMA, RWD were able to capture the seasonal component within the Hasbro Quarterly Sales data. 
+
+### 2) a)	Determining the best forecasting method (TSLM (seasonal and trend), ETS, ARIMA, STL and RW with drift.) for Domino’s quarterly sales.
+
+#### Import the dataset for Hasbro Quarterly Sales Data
+```{r}
+as1_data.1 <- read.csv("C:/Users/John/Desktop/ECON 4210/Assignment 1/as1_data-1.csv")
+View(as1_data.1)
+```
+
+#### Rename the data for convenience ( HQS = Hasbro Quarterly Sales)
+```{r}
+DPS = as1_data.1
+```
+
+#### Define the data set as time series for R 
+```{r}
+DPS = ts(as1_data.1, start=2002, frequency=4)
+View(DPS)
+```
+
+#### Create a named variable  
+```{r}
+z = DPS[,"DPZ"]
+```
+
+#### Create a Quarterly Sales Time Series plot to visualize data
+```{r}
+autoplot(z) + geom_line(col="black", size=1) + 
+  ggtitle("Dominos Pizza Quarterly Sales (millions $)") +
+  labs(y="Millions of USD",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+```
+
+#### Now, the data ranges for training and testing must be defined. The time periods 2002:1 to 2013:4 will be used for training. While time periods 2014:1 to 2019:3 will be used for testing. 
+```{r}
+trainDPS <- window(z,start=c(2002, 1),end=c(2013, 4), frequency=4)
+plot (trainDPS)
+
+testDPS <- window(z, start=c(2014,1),end=c(2019, 3), frequency=4)
+bothDPS <- window(z,start=c(2000, 1))
+h=length(testDPS)
+```
+
+### Now, each model must be applied to the training set above. Then, each model will be forecasted to compare the accuracy between the models.
+
+#### TLSM
+```{r}
+fit.tslmDPS <- tslm(trainDPS ~ trend + season)
+forecast1 <- forecast(fit.tslmDPS, h=h)
+```
+
+#### ETS
+```{r}
+fit.etsDPS <- ets(trainDPS, model="ZZZ")
+forecast2 <- forecast(fit.etsDPS, h=h)
+```
+
+#### STL
+```{r}
+fit.stlDPS <- stl(trainDPS, t.window=15, s.window="periodic", robust=TRUE)
+forecast3 <- forecast(fit.stlDPS, method="rwdrift",h=h)
+```
+
+#### ARIMA
+```{r}
+fit.arimaDPS <- auto.arima(trainDPS)
+forecast4 <- forecast(fit.arimaDPS, h=h)
+```
+
+#### RW with drift
+```{r}
+forecast5 <- rwf(trainDPS, h=h, drift=TRUE)
+```
+
+#### Plot of each model 
+```{r}
+pl1 = autoplot(z) + autolayer(testDPS) + autolayer(forecast1, series="TSLM", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Dominos Quarterly Sales Forecasts-TSLM") + guides(colour=guide_legend(title="Legend"))
+pl2 = autoplot(z) + autolayer(testDPS) + autolayer(forecast2, series="ETS", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Dominos Quarterly Sales Forecasts-ETS") + guides(colour=guide_legend(title="Legend"))
+pl3 = autoplot(z) + autolayer(testDPS) + autolayer(forecast3, series="STL", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Dominos Quarterly Sales Forecasts-STL") + guides(colour=guide_legend(title="Legend"))
+pl4 = autoplot(z) + autolayer(testDPS) + autolayer(forecast4, series="ARIMA", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Dominos Quarterly Sales Forecasts-ARIMA") + guides(colour=guide_legend(title="Legend"))
+pl5 = autoplot(z) + autolayer(testDPS) + autolayer(forecast5, series="RWD", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Dominos Quarterly Sales Forecasts-RWD") + guides(colour=guide_legend(title="Legend"))
+```
+
+#### Displaying the plots for TLSM, ETS
+```{r}
+gridExtra::grid.arrange(pl1, pl2, nrow =2)
+```
+
+#### Displaying the plots for STL, ARIMA
+```{r}
+gridExtra::grid.arrange(pl3, pl4, nrow =2)
+```
+
+#### Displaying the plots for RW with Drift
+```{r}
+gridExtra::grid.arrange(pl5, nrow =1)
+```
+
+#### Now that forecast plot using each of the models are generated, the accuracy of each forecast models will be compared. To do so, number of accuracy measures will be calculated, with the models being ordered by the MASE accruacy figure
+```{r}
+a1 = accuracy(forecast1, testDPS)
+a2 = accuracy(forecast2, testDPS)
+a3 = accuracy(forecast3, testDPS)
+a4 = accuracy(forecast4, testDPS)
+a5 = accuracy(forecast5, testDPS)
+
+a.table<-rbind(a1, a2, a3, a4, a5)
+
+row.names(a.table)<-c('TSLM training', 'TSLM test', 'ETS training', 'ETS test', 'STL training', 'STL test', 'ARIMA training', 'ARIMA test', 'RWD training', 'RWD test' )
+
+a.table<-as.data.frame(a.table)
+a.table<-a.table[order(a.table$MASE),]
+a.table
+```
+
+#### 2 a) Analysis of accuracy metrics, plots - Determining the best forecasting method
+From the accuracy measure table above, its clear that the ETS model has the highest accuracy/best fits the training set data for Dominos Quarterly Sales Data. This is evident from the fact that ETS model has produced the lowest MASE value of 0.4648062 when compared to other model/methods. Its also worth noting that ETS model has the lowest values for RMSE, MAE, and MAPE accuracy metrics. While its clear that ETS model is the best fitting model for the Domino's training data set, Arima model us the second besst fitting model, and STL model being third based on the 4 accuracy metrics mentioned. 
+
+The story is different for the test set as the model that best fits the test sets range of observations is the RW with Drift model/method. This is due to the fact that RWD method has the lowest MASE value of 5.4956186 when compared to other models for test set. In addition, RW with Drift had the lowest RMSE, MAE, MAPE accuracy measures for the test set. The reason why RWD model is the best fitting model for the test data set is due to the fact that RWD was the only model that was able to capture upward trend in the data based on the plots above. The second best fitting model for the test set is the STL method as it has the second lowest values for the MASE and other 3 accuracy metrics mentioned previously. 
+
+For the worst fitting models, the accuracy table shows that the RWD method has the lowest degree of fit for the Domino training data set as they have the highest values in the error metrics RMSE, MAE, MAPE, and MASE. From the Dominos test data set, the worst fitting model is the TSLM method as it resulted in the highest values for the error metrics RMSE, MAE, MAPE, and MASE. 
+
+### b) Forecast sales for 2019:4 to 2020:4
+
+#### Forecast values and plot for TLSM  
+```{r}
+z.f1 <- tslm(z ~ trend + season)
+z.f1 = forecast(z.f1,h=5)
+z.f1
+```
+
+```{r}
+autoplot(z.f1) +
+  ggtitle("TLSM Forecasts of Dominos Quarterly Sales") +
+  xlab("Year") + ylab("Quarterly Sales (millions $)")
+```
+
+#### Forecast value and plot for ETS
+```{r}
+z.f2 <- ets(z, model="ZZZ")
+z.f2 = forecast(z.f2,h=5)
+z.f2
+autoplot(z.f2)
+```
+
+```{r}
+autoplot(z.f2) +
+  ggtitle("ETS Forecasts of Dominos Quarterly Sales") +
+  xlab("Year") + ylab("Quarterly Sales (millions $)")
+```
+
+#### Forecast value and plot for STL
+```{r}
+z.f3 <- stl(z, t.window=15, s.window="periodic", robust=TRUE)
+z.f3 = forecast(z.f3, method="rwdrift", h=5)
+z.f3
+```
+
+```{r}
+autoplot(z.f3) +
+  ggtitle("STL Forecasts of Dominos Quarterly Sales") +
+  xlab("Year") + ylab("Quarterly Sales (millions $)")
+```
+
+#### Forecast value and plot for ARIMA
+```{r}
+z.f4 <- auto.arima(z)
+z.f4 = forecast(z.f4, h=5)
+z.f4
+```
+
+```{r}
+autoplot(z.f4) +
+  ggtitle("ARIMA Forecasts of Dominos Quarterly Sales") +
+  xlab("Year") + ylab("Quarterly Sales (millions $)")
+```
+
+#### Forecast value and plot for RW with drift - The most accruate model for Dominos test data set
+```{r}
+z.f5 <- rwf(z, h=5, drift=TRUE)
+```
+
+```{r}
+autoplot(z.f5) +
+  ggtitle("RWD Forecasts of Dominos Quarterly Sales") +
+  xlab("Year") + ylab("Quarterly Sales (millions $)")
+```
+
+#### 2 b) Analysis of forecast from 2019:4 to 2020:4
+Based on the analyses in the parts above, its evident that the RW with Drift model produces the best fit to the Dominos Quarterly Test set data as it was the only model which caputured the significant upward trend in the data. Hence, it can be said that the RWD model will produce the most accurate forecasts when compared to the other models above. 
+
+# 3) (Domino Pizza’s quarterly sales analysis to construct time series cross validation for each of TSLM, ETS, ARIMA, RW with drift (he forecast horizon is 6 periods, window length of 50 observations)
+
+#### To start, must establish code to retrieve forecast objects from TSLM, ETS, STL, ARIMA, RWD methods
+```{r}
+ftslmTS <- function(x, h) {forecast(tslm(x ~ trend + season), h = h)}
+
+fetsTS <- function(x, h) {forecast(ets(x), h = h)}
+
+farimaTS <- function(x, h) {forecast(auto.arima(x), h=h)}
+
+frwdTS <- function(x, h){forecast(Arima(x, order=c(0,1,0), include.drift=TRUE), h=h)}
+```
+
+#### Then, must compute the CV errors for TSLM as e1, ETS as e2, STL as e3, ARIMA as e4, and RWD as e5
+```{r}
+e1 <- tsCV(z, ftslmTS, h=6, window=50)
+
+e2 <- tsCV(z, fetsTS, h=6, window=50)
+
+e3 <- tsCV(z, farimaTS, h=6, window=50)
+
+e4 <- tsCV(z, frwdTS, h=6, window=50)
+```
+
+## a)	Based on MSE which model fits the best for each forecast period?
+#### Calculating MSE values for all the models in each of the 6 periods
+```{r}
+#TSLM
+mse.tslm = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.tslm[j] = mean(e1[,j]^2, na.rm=TRUE)
+  print(mse.tslm[j])
+}
+```
+
+```{r}
+#ETS
+mse.ets = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.ets[j] = mean(e2[,j]^2, na.rm=TRUE)
+  print(mse.ets[j])
+}
+```
+
+```{r}
+#ARIMA
+mse.arima = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.arima[j] = mean(e3[,j]^2, na.rm=TRUE)
+  print(mse.arima[j])
+}
+```
+
+```{r}
+#Random Walk with Drift
+mse.rwd = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.rwd[j] = mean(e4[,j]^2, na.rm=TRUE)
+  print(mse.rwd[j])
+}
+```
+
+```{r}
+a.table.mse <- rbind(mse.tslm, mse.ets, mse.arima, mse.rwd)
+row.names(a.table.mse) <- c('TSLM MSE', 'ETS MSE', 'ARIMA MSE', 'RWD MSE')
+colnames(a.table.mse) <- c('H = 1', 'H = 2', 'H = 3', 'H = 4', 'H = 5', 'H = 6')
+a.table.mse <- as.data.frame(a.table.mse)
+a.table.mse
+```
+
+#### 3 a) Analysis ofwhich model fits the best for each forecast period based on MSE values
+Analysis of the MSE values provides an interesting result. For the first 2 periods (H=1 and H=2), the ETS model produced the lowest MSE values at 1121.334 for period 1 and 2142.398 for period 2. However, from period 3 (H=3) onwards the ARIMA model produced the lowest MSE values. This result is likely due to the fact that ETS model was able to capture seasonality better for the 2 periods while ARIMA was able to capture seasonality the best for period 3 and onwards when compared to other models.
+
+On the other hand, RWD model produced the highest MSE values for periods 1-3, making it the worst model in the period/horizion 1-3. From period 4-6, TSLM model had the highest MSE values, making it the worst model for the periods 4-6. The reason why these 2 models produced the highest MSE values and making it the worst forecast model is due to the fact that it isnt able to capture seasonality in the data - the upward trend in the data.
+
+Therefore, the best fitting model for periods H=1, and H=2 is the ETS model. While the best fitting for periods H=3, H=4,H=5,H=6 is the ARIMA model. The worst fitting models for period H=1, H=2, H-3 is the RWD model while from periods H=4, H=5, H=6, the worst fitting model was TSLM.
+
+## b)	Plot of MSE for each forecast model along its forecast period 
+
+```{r}
+#TSLM
+mse.tslm.plot <- colMeans(e1^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for TSLM Method")
+```
+  
+```{r}
+#ETS
+mse.ets.plot <- colMeans(e2^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.ets.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for ETS Method")
+```
+ 
+  
+```{r}
+#ARIMA
+mse.arima.plot <- colMeans(e3^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.arima.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for ARIMA Method")
+```
+  
+```{r}
+#Random Walk with Drift
+mse.rwd.plot <- colMeans(e4^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.rwd.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for RWD Method")
+```
+  
+#### 3 b) Analysis of MSE plots
+After plotting the MSE values against the forecat periods that goes up to 6 periods, it can be observed that there is clear upward trend in all of the plots for the models above. This shows that as forecast horizon increases, the error value MSE will also increase. Such phenomenon is understandable as the accuracy and the reliability of the model decreases as time horizon expands and forecasts more into the future. Such observation was also apparent in the question 2 above where the forecasted line strayed off from the actual values as period expanded. An interesting observation could be seen in RWD model where there was a significant drop in the MSE value at period 4 (H=4), which subsequently increases in the later periods.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
