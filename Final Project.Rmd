@@ -1,0 +1,1134 @@
+---
+title: "ECON 4210R - Final Term Paper"
+subtitle: 'Schulich School of Business, Winter 2020'
+author: "Jonghyuk Lee - 214762017"
+date: "Assignment Due Date: April 7th, 2020"
+output: html_document
+fontsize: 12pt
+---
+
+## Introduction – Examining Hasbro’s Quarterly Sales Data, What Lies in The Future? 
+This research paper will examine and identify the various elements that effect the quarterly sales data of one of the world’s leading toy/entertainment company – Hasbro. Like the evolution of toys, the evolution of computational power allows for an in-depth analysis into factors that impact Hasbro’s quarterly sales. More specifically, this paper will use various models, methods to visualize Hasbro’s quarterly sales over the 15 year period from 2003 Q1 – 2019 Q3, which will then be analyzed to provide insights into any seasonality, trends, and randomness that exist within the dataset. Then, different forecasting methods will be applied to the data set to forecast the quarterly sales of Hasbro. To ensure that the most accurate forecasting method is being applied, the accuracy metrics (MASE, MPE etc…) for each of the methods will be compared to each other to identify the optimal model for forecasting. Summary of all the major findings of this research paper will be provided through a comprehensive analysis. 
+
+This paper determined that it is critical to analyze the quarterly sales data of Hasbro due to the uncertainties ahead. Since its inception in 1923, Hasbro has expanded its operations from selling anything from toys to electronic games in order to keep in line with the changing consumption patterns of the millennial generation. As a result, Hasbro has made many iconic brands from monopoly to more recent hits such as Nerf and have cemented its position as one of the world’s leading toys/entertainment manufacturer, generating over $4.58B in 2018 revenue. However, Hasbro has faced many critical challenges in recent years. While Hasbro engages in extensive R&D to meet the needs of consumers, the surge of tech gadget’s popularity has posed series threats to Hasbro’s profitability. This is evident from the fact that 29% of children use tech gadgets as toddlers, and 70% of them master it by primary school – possibly shifting away from toys. In addition, surge of competitors such as Spin Masters combined with stagnation of toy industry evident from bankruptcy of Toys R Us, means that accurate forecast of sales is critical to ensure Hasbro’s success. Therefore, using the accurate sales forecasts, Hasbro can prepare itself for any uncertainties that lies ahead. 
+
+## Research Methodology – Forecasting Methods Used in Analysis 
+As discussed previously, this research paper utilizes various forecasting methods to determine the most accurate forecast model to be used. The forecasting methods used in this paper can be divided into 2 general techniques: simple techniques, and advanced models – each of them will be explained below.
+
+**Simple forecasting methods:** the 4 benchmark forecasting methods – Average, Naïve, Seasonal Naïve, and RW with Drift will be applied to forecast the Hasbro quarterly sales data. While these 4 methods are relatively simple compared to the advanced forecast models, it serves as a good benchmark that can be used to compare against the advanced forecasting methods for accuracy and effectiveness. If the simple methods outperform the advanced methods in accuracy, the advanced methods will be deemed ineffective and the simple methods will be chosen as the optimal forecasting model with best fit.
+Simple Exponential Smoothing/Moving Average method: time series forecasting method used for univariate data that doesn’t have any existing trend or seasonality. This method only requires a single parameter – alpha/smoothing factor/smoothing coefficient.
+
+**HW:** Holt and Winters method or algorithm: the HW method is used to capture seasonality and is comprised of forecast equation along with 3 smoothing equations. As HW method is used to capture seasonality within the data, its most effective provided that the series is seasonal. The 2 methods in HW model is: Additive method, and Multiplicative method. Additive method is used when seasonal variation is roughly constant through the series. ON the other hand, multiplicative method is preferred when seasonal variations are changing proportional to the level of the series. This research paper used the following 6 HW forecasting methods: 
+
+•	HW linear trend method
+
+•	HW damped trend method
+
+•	HW seasonal method – multiplicative
+
+•	HW seasonal method - additive
+
+•	HW damped trend method – multiplicative
+
+•	HW damped trend method – additive
+
+**TSLM - Trend plus seasonal method:** In this research paper, the TSLM function was used to fit a linear model with time series components - trend and seasonality for forecast purposes 
+
+**Seasonal and Trend decomposition using Losses (STL):** statistical method of decomposing a time series data into 3 components containing seasonality, trend, and residual while estimating nonlinear relationships. Some of the main advantages of STL are that it will handle any type of seasonality beyond monthly/quarterly data, seasonal component can change over time, and it can be robust to outliers. The disadvantages of STL are that it doesn’t handle trading day or calendar variation automatically, and it only provides facilities for additive decompositions. 
+
+**Error, Trend, and Seasonal method (ETS):** generates a stage space model where each model contains a measurement equation depicting the observation data along with other equations describing how the unobserved states (trend/seasonal components) change over the period. 
+
+**AutoRegressive Integrated Moving Average method (ARIMA):** provides another approach to time series forecasting that combines differencing with autoregression and moving average model. As a result, it is one of the most widely used approaches to time series forecasting. ARIMA model aims to describe the autocorrelations that are present within the data set. 
+
+**TBATS:** this model uses a combination of Fourier terms. an exponential smoothing state space model, and a Box-Cox transformation in a fully automated manner. An advantage of TBATS model is that seasonality in the data set is allowed to slowly change over time. However, a drawback of TBATs model is that they can be slow to estimate especially when concerning long time series. 
+
+**Neural Network AutoRegression (NNETAR):** this function/method is used to fit a Neural Network AutoRegression model to the data set in question. The lagged values of a time series are used as inputs into this neural network model. 
+
+**Vector AutoRegression method (VAR):** VAR model is used to capture any interdependencies that can possibly exist between multiple time series variables – its useful for modelling the dynamic interaction between the variables. VAR allows the use of one model to forecast multiple time series variable as opposed to just forecasting 1 variable. 
+
+The forecast accuracies for the forecasting models mentioned above will be calculated using the metrics: MASE, MAPE, RMSE, MAE. Then, the accuracy metrics for each of the forecasting models will be compared against each other to determine the model with best fit and forecast accuracy. In addition to the calculation of accuracy metrics, a time series cross validation (tsCV) will be done to analyze the above-mentioned models forecast accuracy. Combination of these 2 balances and checks will ensure that the best forecasting model with the highest forecasting accuracy is used for the analysis. 
+
+In order to utilize these methods, the dataset used and appleid in this research paper will be explained in the following section. 
+
+## Data Collection – Description of Data used in the Research Paper and its Sources 
+The primary dataset used in this research report is Hasbro’s quarterly sales data from periods 2003 Q1 – 2019 Q3, 15 years worth of quarterly sales data. As Hasbro’s fiscal year end is on December 31st, the quarters are divided into 4 periods Jan – Mar, Apr – Jun, Jul – Sept, Oct – Dec. The 15 years of Hasbro’s quarterly sales data were obtained from Stockpup with any discrepancies and anomalies being corrected using Ycharts, Yahoo Finance, and Bloomberg terminal. 
+
+In order to analyze the data using the VAR method, the Hasbro quarterly sales data was analyzed in association with US Retail sales for Hobby/Toy/Game stores, and Disposable Personal Income (DPI). These 2 additional data sets were obtained from Federal Reserve of Bank of St.Louis (FRED), and were quarterly data – in line with the Hasbro sales data. Using the 2 datasets, the purpose of the VAR analysis was to determine if there are any relationship between Hasbro’s sales figure and US retail sales figure for Hobby/Toy/Game stores. The US retail sales for toys data set was chosen for VAR analysis in conjunction with Hasbro sales data as the report tried to determine if Hasbro sales moved in line with/were affected by the overall toy sales in the US. If the correlation existed between the 2 sales figures, Hasbro can better forecast its future performance based the US retail sales figures. In addition, the report also tried to determine if there was any association between the Hasbro sales performance and the disposable income that consumers have – which is the money available for spending to households after income taxes. The theory that report tried to uncover was that if people had more money to spend (DPI), then, Hasbro sales should reflect the increase in spending by the US households. If such correlation existed, Hasbro can also better determine their performance based on the amount that is available for spending amongst the US households.
+
+Now, using the different datasets explained above, 6 different data analytical procedures will be performed to get an in depth look into Hasbro’s quarterly sales. 
+
+
+## Data Analysis - Statistical Analysis and Visualization of Dataset 
+
+#### Loading packages used for analysis
+```{r message=FALSE}
+library(fpp2)
+library(knitr)
+library(vars)
+library(kableExtra)
+```
+
+#### Import the dataset for Hasbro's quarterly sales data from 2003 Q1 - 2019 Q3 (15 years)
+```{r}
+HASBRO.Quarterly.Sales.Data <- read.csv("C:/Users/John/Desktop/ECON 4210/Final Project/HASBRO Quarterly Sales Data.csv")
+View(HASBRO.Quarterly.Sales.Data)
+```
+
+#### Renaming the data set for convenience
+```{r}
+HQS = HASBRO.Quarterly.Sales.Data
+```
+
+#### Classifying the data set as time series 
+```{r}
+HQS = ts(HASBRO.Quarterly.Sales.Data, start=2003, frequency=4)
+View(HQS)
+```
+
+#### Named variable for Hasbro quarterly sales/revenue
+```{r}
+y = HQS[,"HAS"]
+```
+
+### Data Analysis 1 - Identifying Trend Through Time Plot Analysis
+```{r}
+#### Creating a Quarterly Sales Time Series plot to visualize data
+autoplot(y) + geom_line(col="black", size=2) + 
+  ggtitle("Hasbro Quarterly sales (millions $)") +
+  labs(y="Millions of USD",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+```
+
+**Analysis of Time Plot**
+
+As seen above from the time plot of Hasbro’s quarterly sales data, its evident that there is no clear increasing/positive trend in the Hasbro revenue data. While there are wide gaps/drops which results in significant variations in revenue figures from quarter to quarter, there is no apparent upward trend that stands out. Although the revenues have increased overtime, it hasn’t been increasing significantly to show a clear upward trend. Overall, this means that while Hasbro’s revenue has increased overtime, it has relatively stayed consistent over the 15 year horizon without any significant drops or increases in peaks and troughs.
+
+### Data analysis 2 - Identifying Seasonality Through Seasonal Plots 
+```{r}
+#### Graphing Seasonal plot
+ggseasonplot(y, year.labels=TRUE, year.labels.left=TRUE) + 
+  ylab("$ million USD") +
+  ggtitle("Seasonal plot: Hasbro Quarterly Revenue")
+
+ggsubseriesplot(y)+ ylab("$ million USD")+ ggtitle("Seasonal subseries plot: Hasbro Quartery Revenue") 
+```
+
+**Analysis of Seasonal Plot** 
+
+Seasonal plots of Hasbro’s quarterly sales data shows that seasonality is very much apparent and plays a huge role in Hasbro’s revenue. From the data, its evident that the revenues from Q1 to Q2 only experience a slight increase each year, and the revenues for both periods are always lower than the last 2 quarters. Then, the revenue increases significantly in Q3 each year and stays relatively consistent until Q4 until the revenue drops again in Q1. This pattern of lower revenue in Q1 and Q2 and significant increase in revenue in Q3 and Q4 shows that Hasbro’s quarterly sales data exhibits a very strong seasonal pattern. This is likely due to the fact that as a toy manufacturer, Hasbro likely sees majority of its revenue for the year during the months leading up to winter holidays and holiday months which are all in Q3 and Q4. This strong seasonal pattern for Hasbro is further amplified by the seasonal subseries plot. In the subseries plot, the revenue data for each quarter is combined and displayed in separate time plots with mean quarterly revenue figure represented by the blue line. From the mean revenue line, its evident that the revenue figures for Q1 and Q2 are similar and low while the Q3 and Q4 revenue figures experience a significant increase and is similar with each other. As a result, it is apparent that Hasbro’s quarterly revenue data displays a strong seasonality pattern. 
+
+To further examine the extent of trend and seasonality that is present within the Hasbro quarterly sales dataset, the autocorrelation function (ACF) will be used to examine such components below. 
+
+### Data analysis 3 - Autocorrelation (ACF) Analysis to Determine Trend and Seasonality
+```{r}
+#### Graphing Autocorrelation 
+ggAcf(y)+ 
+  ggtitle("ACF:Hasbro Quarterly Revenue")+
+  xlab("Lag")+ ylab("ACF")
+```
+
+**Analysis of ACF**
+
+According to autocorrelation function for Hasbro’s quarterly sales data plotted below, there are no strong trends that are present in data. This is due to the fact that autocorrelation function of time series plot with trend typically displays large positive values that gradually decreases as lag (x-axis) increases. In the case of Hasbro, ACF doesn’t display such characteristics of strong trends as it doesn’t have large positive values in the beginning that slowly decrease as lags increase. Instead, from r1 to r2, we notice a significant drop in value which recovers in r3 which then significantly increases in value in r4. This shows that while the data doesn’t display strong trends, it displays strong seasonality confirmed by above as the autocorrelations are larger for the seasonal lags at points of seasonal frequency than for other lags. This is evident from the massive peaks and troughs that occur in every 4 intervals where peaks and troughs occur every 4 quarters apart. In addition, these peaks and troughs are always significantly higher and lower compared to other lags in the ACF graph.   
+
+### Data analysis 4 – Decomposing Data to Further Investigate the Seasonality Within Dataset 
+```{r}
+#### Using decompose function to breakdown the data into seasonality, trend, and remainder
+y %>% decompose() %>% autoplot() + xlab("Year")
+```
+
+**Analysis of Decomposed Data*
+
+Decomposed graphs of Hasbro quarterly sales data set using the decompose function provides lots of key insights into the data set. The first plot shows the time plot of Hasbro’s quarterly sales from the periods 2003 Q1 – 2019 Q3. In addition, the second plot shows the seasonality within the data set, which shows that there is a very consistent and obvious seasonal pattern within the data, that closely resembles Hasbro’s original quarterly sales figure. This simply confirms that the sales figure is highly seasonal. The third plot shows the overall trend apparent in the data set, and its evident from above that there is a slight upward trend movement within the Hasbro quarterly sales data – it’s a gradual slope, not a steep upward trend. The last panel just simply displays the remainders or random component that is left over once the seasonal and trend components are removed from the data. 
+
+### Data analysis 5 - Fitting a Linear Trend and Seasonal Component to Dataset (Residuals and Outliers will also be examined)
+```{r}
+fit.hb <- tslm(y ~ trend + season)
+summary(fit.hb)
+```
+
+**Analysis of Summary Statistics*
+
+Summary statistics above shows information regarding the fit of the model. First of all, the fitted model has an intercept of 392.4421 with a standard error of 28.8648 – this refers to the fact that when x (referring to the time index) = 0, the value of y will equal 392.4421 (sales in millions USD). The establishment of intercept is critical to prevent distortion within the slope coefficient which is 7.6961 with a standard error of 0.5704. Since the fitted line has a positive slope coefficient, this means that there is a positive correlation between Hasbro quarterly sales and the time index. Hence, as time progresses, Hasbro’s quarterly sales figure will increase at an average of $7.6961 million USD per quarter. The model also has an R-squared value of 0.9399 which means that 93.99% of the variation within Hasbro’s quarterly sales data set can be explained by the model while 6.01% of the variation within Hasbro’s quarterly sales data cannot be explained by the model. Therefore, with a very high R-squared figure, it can be concluded that the model is doing a good job at fitting the dataset. 
+
+#### Visualization of fitted model 
+```{r}
+autoplot(y, series="Data") +
+  autolayer(fitted(fit.hb), series="Fitted") +
+  xlab("Year") + ylab("$ million USD") +
+  ggtitle("Hasbro Quarterly Sales")
+```
+
+Time plot from above proves the statement above as it is clearly observable that the fitted model is doing a good job at predicting Hasbro’s quarterly sales figure. One thing to note from the plot is that the fitted values seems to slightly stray from the actual data between 2017 – 2018. This deviation is likely due to the fact that Hasbro sales between 2017 - 2018 was higher than normal which was caused by a Paramount deal that allowed Hasbro to produce popular move franchise toys such as transformers and Iron man for the holiday shopping season. Otherwise, the model does a good job at fitting the dataset. 
+
+#### Scatterplot to identify outliers
+```{r}
+cbind(Data = y,
+      Fitted = fitted(fit.hb)) %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Data, y=Fitted)) +
+    geom_point() +
+    ylab("Fitted (predicted values)") +
+    xlab("Data (actual values)") +
+    ggtitle("Hasbro Quarterly Sales") +
+    geom_abline(intercept=0, slope=1)
+```
+
+Scatter plot above shows that while there are few outliers that can be clearly seen, the fitted values are relatively located close to the actual values, which suggests that there are no influential outliers that exist within the current dataset. 
+
+#### Residual disagnostics 
+```{r}
+checkresiduals(fit.hb)
+```
+
+The first graph showing the time plot of residual indicates that there is a relatively consistent variation across the historical data. While there are some peaks and troughs apparent in the graph, it has a consistent pattern that runs through it. In addition, such pattern seems to partly resemble the seasonality seen in the actual time plot of actual observations.
+
+The autocorrelation plot shows a significant peak in the beginning that suddenly dips at r4. Since there is no gradual decrease of the lines as the lag (x-axis) increases, it shows that there is no strong trend present in the data – just a slight upward trend. However, it displays a strong seasonality that ca be clearly observed from the data set. 
+
+The histogram plot shows that residuals seems to be even on the right but a slight skew to the left, which can have and effect on the coverage probability of the prediction intervals. 
+
+### Data analysis 6 - VAR to examine interaction between Hasbro Quarterly sales data (HAS), and US retail sales of hobby/toy/game stores (HTG), and US Disposable Personal Income in $ Billion (DPI)
+
+#### Import the dataset for the interaction between Hasbro Quarterly Sales Data (in millions of USD), and US retail sales od hobby/toy/game *HTG), and US Disposable Personal Income (in billions of USD).
+```{r}
+HASBRO.Quarterly.VAR.Data <- read.csv("C:/Users/John/Desktop/ECON 4210/Final Project/HASBRO Quarterly VAR Data.csv")
+View(HASBRO.Quarterly.VAR.Data)
+```
+
+#### Renaming the data set for convenience
+```{r}
+HVAR = HASBRO.Quarterly.VAR.Data
+```
+
+#### Classifying the data set as time series 
+```{r}
+Hasbro.var = ts(HVAR, start=2003, frequency=4)
+View(Hasbro.var)
+```
+
+#### Now, the data ranges for training and testing must be defined for forecasting purposes. There is total of 67 observations. For training purposes, 80% of the data will be used, which is 54 observations spanning from 2003 Q1 - 2016 Q2. Then, 20% of the data will be used for testing purposes, which is 13 observations spanning rom 2016 Q3 - 2019 Q3.
+```{r}
+trainVAR <- window(Hasbro.var,start=c(2003, 1),end=c(2016, 2))
+print(trainVAR)
+```
+
+```{r}
+plot (trainVAR[,c(4,3,2)])
+```
+
+The VAR plot above shows that there may be correlation between the 3 variables. Between HAS and HTG data, both data seems to be very seasonal in nature. However, the cycle within the seasonality might differ between the 2 variables. In addition, there may be a slight correlation between DPI and HAS due to a slight upward trend that was discovered in the prior analysis – which can also be seen above. 
+
+```{r}
+testVAR <- window(Hasbro.var, start=c(2016,3),end=c(2019, 3))
+print(testVAR)
+both <- window(Hasbro.var,start=c(2003, 1))
+h=dim(testVAR)[1]
+```
+
+#### Rename 3 variables for convenience purpose, also plot the 3 variables to visualize the variables.
+```{r}
+x1 = trainVAR[,"HAS"]
+x2 = trainVAR[,"HTG"]
+x3 = trainVAR[,"DPI"]
+
+p1 = autoplot(x1) + geom_line(col="black", size=1) + 
+  ggtitle("Hasbro Quarterly Revenue - HAS") +
+  labs(y="Millions of $",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+
+p2 = autoplot(x2) + geom_line(col="black", size=1) + 
+  ggtitle("US Retail sales (Hobby/Toy/Game Stores)") +
+  labs(y="Millions of $",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+
+p3 = autoplot(x3) + geom_line(col="black", size=1) + 
+  ggtitle("US Disposable Personal Income") +
+  labs(y="Billions of $",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+
+gridExtra::grid.arrange(p1, p2, p3, nrow=2)
+```
+
+
+#### Applying Vector Auto Regression (VAR) to examine interaction between Hasbro Quartery sales data (HAS), and US retail sales of hobby/toy/game stores (HTG), and US Disposable Personal Income in $ Billion (DPI). 
+```{r}
+vardata = log (trainVAR[,c(2,3,4)])
+nrow(vardata)
+plot(vardata, main = "VAR Data", xlab = "")
+```
+
+#### Correlation statistics are caluated and analyzed to delve deeper into the interaction between 3 variables
+```{r}
+cor(trainVAR[,2:4])
+```
+
+From the correlation statistics above, its apparent that our findings regarding the interaction between 3 variables are confirmed. There is a higher correlation between the 2 variables Hasbro Quarterly Sales Data (HAS) and US retail sales: Hobby/Toys/Games (HTG) as it shows the correlation value of 0.5544423, showing a relatively higher correlation between the 2 variables. As mentioned previously, this is likely due to the fact that both variables display seasonality present within the data. Comparatively, there is a weak positive correlation between: Hasbro Quarterly sales and Disposable Personal Income (DPI) 0.3705956. In addition, there is a weaker positive correlation between US retail sales: Hobby/Toys/Games (HTG) and Disposable Personal Income (DPI) with correlation value of 0.1026034.
+
+#### Now, the optimal number of lags to be used in the model will be determined. In order to do so, VARselect funciton will be applied to the data set with the maximum amount of lags being fixed at 9. In addition, 2 versions of VARselect function will be applied to compare the models with “constant” to models that include both “constant” and “trend”.
+```{r}
+VARselect(vardata, lag.max = 9, type = "both", season=4)
+```
+
+```{r}
+VARselect(vardata, lag.max = 9, type = "const", season=4)
+```
+
+In order to determine the optimal number of lags, AIC and BIC (or otherwise known as Schwarz Criterion) values from results above are used. From the first VARselect function using type=“both”, the AIC criteria suggests a lag of 9 while the BIC criteria suggests lag of 1. On the other hand, in the second VARselect function using type=“const”, AIC criteria suggests lag o 9 and BIC criteria suggests lag of 1. With discrepancy between AIC and BIC in the first VARselect function, its usually better to use the lag value given by the BIC criteria since AIC has the tendency to choose large numbers instead of lags. Further tests will be performed to determine the optimal number of lags below.
+
+#### Next, the roots of VAR model will be analyzed, which will assist in determining the overall fit of the VAR model.
+```{r}
+#### "Const" model, lag of BIC = 1
+var.1 = VAR(vardata, p=1, type = "const", season =4)
+summary(var.1)
+```
+
+```{r}
+#### "Const" model, lag of AIC = 9
+var.2 = VAR(vardata, p=9, type = "const", season =4)
+summary(var.2)
+```
+
+```{r}
+#### "Both" model, lag of BIC = 1
+var.3 = VAR(vardata, p=1, type = "both", season =4)
+summary(var.3)
+```
+
+```{r}
+#### "Both" model, lag of AIC = 9
+var.4 = VAR(vardata, p=9, type = "both", season =4)
+summary(var.4)
+```
+
+```{r}
+#### Roots of "Const" model, lag of BIC = 1
+roots(var.1)
+```
+
+```{r}
+#### Roots of "Const" model, lag of AIC = 9
+roots(var.2)
+```
+
+```{r}
+#### Roots of "Both" model, lag of BIC = 1
+roots(var.3)
+```
+
+```{r}
+#### Roots of "Both" model, lag of AIC = 9
+roots(var.4)
+```
+
+The above calculation was conducted to find the roots of the VAR models in order to determine the VAR model with the best fit. In order to do this, 4 potential roots were calculated: “Const” typed VAR with BIC suggested lag of 1 (p=1) which was var.1 and AIC suggested lag of 9 (p=9) which was var.2. In addition, “both” typed VAR with BIC suggested lag value of 1 (var.3) and “both” typed VAR with AIC suggested lag value of 9 (var.4)’s roots were calculated.
+
+A good fitting VAR model needs to have a root values of characteristic polynomial under the value of 1. From the root calculation results above, its evident that “Const” and “Both” typed VAR models have values that are below 1. While the root values are all below 1, its important to note that “Const” model and “Both” models with BIC lags of p=1 had lower root values than the AIC counterparts. Further Portmanteu Test will be used to determine the selection of optimal lag number
+
+#### Now, the Portmanteau Test for the lags (BIC lag = 1, AIC lag = 9). The test will only be performed for “both” typed models as it was determined above that the “const” typed models had a suboptimal fit. In addition, there will be 2 types of Portmanteu test performed for the two lags mentioned.
+
+#### "Const" model Portmanteau Test 
+```{r}
+# "Const" model, BIC (p=1) PT.asymptotic test
+serial.test(var.1, lags.pt = 16, type = "PT.asymptotic")
+```
+
+```{r}
+# "Const" model, BIC (p=1) PT.adjusted test
+serial.test(var.1, lags.pt = 16, type = "PT.adjusted")
+```
+
+```{r}
+# "const" model, AIC (p=9) PT.asymptotic test
+serial.test(var.2, lags.pt = 16, type = "PT.asymptotic")
+```
+
+```{r}
+# "const" model, AIC (p=9) PT.adjusted test
+serial.test(var.2, lags.pt = 16, type = "PT.adjusted")
+```
+
+#### "Both" model Portmanteau Test 
+```{r}
+# "Both" model, BIC (p=1) PT.asymptotic test
+serial.test(var.3, lags.pt = 16, type = "PT.asymptotic")
+```
+
+```{r}
+# "Both" model, BIC (p=1) PT.adjusted test
+serial.test(var.3, lags.pt = 16, type = "PT.adjusted")
+```
+
+```{r}
+# Both" model, AIC (p=9) PT.asymptotic test
+serial.test(var.4, lags.pt = 16, type = "PT.asymptotic")
+```
+
+```{r}
+# Both" model, AIC (p=9) PT.adjusted test
+serial.test(var.4, lags.pt = 16, type = "PT.adjusted")
+```
+
+From the Portmanteau tests above, there are several observations to be made. Its evident that the p-values for “Both” and “Const” models with BIC suggested lag of p=1, had values above 0.05, which means there is a serial correlation up to 16 lags for the adjusted and asymptotic tests preformed when BIC suggested lag is 1. However, for “Both” and “Const” models with AIC suggests lag of p=9, the asymptotic and adjusted test p-values are lower than 0.05. In order to determine the optimal lag value, the results of Portmanteau tests for “Both” and “Const” model using AIC and BIC based VAR models must be done. The “Const” model in general had values greater than “Both” models. Delving in deeper, its evident that the “Const” model with BIC lag of 1 and asymptotic test produced the highest value at 0.6145. Whereas the “Both” model with BIC lag of 1 and asymptotic test produced the second highest value at 0.5491. Therefore, the analysis from now will be using “Const” VAR model with BIC suggested lag of p=1. 
+
+#### Using the optimal number of lags determined from above for VAR model (p=1), the residuals will be determined as the randomness in residuals can be used as an indicator to determine whether it is a good fitting VAR model.
+```{r}
+plot(var.1, names = "HAS" )
+```
+
+```{r}
+plot(var.1, names = "HTG" )
+```
+
+```{r}
+plot(var.1, names = "DPI" )
+```
+
+```{r}
+acf(residuals(var.1), type="partial", lag.max=10)
+```
+
+```{r}
+Acf(residuals(var.1)[,"HAS"], main="ACF of HAS")
+```
+
+```{r}
+Acf(residuals(var.1)[,"HTG"], main="ACF of HTG")
+```
+
+```{r}
+Acf(residuals(var.1)[,"DPI"], main="ACF of DPI")
+```
+
+The various plots of residuals for the variables HAS, HTG, and DPI shows that the residuals for all 3 variables appear to be random. Therefore, this means that the VAR model with a lag 1 suggested by BIC model is a good fit.
+
+#### Now, the casuaity among the variables will be investigated using the Granger Test
+```{r}
+causality(var.1, cause= c( "HTG" ,"DPI" ) )
+```
+
+Granger causality refers to whether or not one variable is useful to forecast the values of another variable - looks at the causality between 2 variables in a time series. In other words, Granger causality can determine whether or not movements in one variable precedes the movement of another variable. The Granger causality tests can be conducted through standard test statistics on the estimated coefficients. The test results will be analyzed below.
+
+The results of Granger Causality null hypothesis states that US Disposable Personal Income (DPI) and US Retail Sales: Hobby/Toys/Game stores (HTG) does not Granger-cause Hasbro’s sales (HAS). In order to accept and not reject this null hypothesis, the p=value must be greater than 0.05. However, the p-value of the results indicates that it is 0.00008841, which is lower than 0.05. As a result, the null hypothesis must be rejected, and there is enough evidence to support the alternate hypothesis. The alternate hypothesis states that US Disposable Personal Income (DPI) and US Retail Sales: Hobby/Toys/Game stores (HTG) DO Granger-cause Hasbro’s sales (HAS).
+
+The instantaneous null hypothesis states that there is no instantaneous causality between US Disposable Personal Income, US Retail Sales: Hobby/Toys/Game Stores, and Hasbro’s sales (HAS). Since the p-value under instantaneous null hypothesis is 0.009953, which is lower than 0.05, the instantaneous null hypothesis is rejected. This is due to the fact that there is enough evidence to support the alternate hypothesis which states that there is instantaneous causality between the 3 variables.
+
+In conclusion, the Granger test results show that US Disposable Personal Income and US retail sales (HTG) does not Granger-cause Hasbro’s sales. There is instantaneous causality between US Disposable Personal Income and US retail sales (HTG) and Hasbro’s sales. 
+
+#### Now, the Impulse Response Functions (IRFs) will be analyzed
+```{r}
+var1.irf <- irf(var.1,  n.ahead = 16, boot = TRUE,  runs=500, seed=99, cumulative=FALSE)
+
+par(mfrow=c(3,3))
+plot(var1.irf, plot.type = "single")
+```
+
+#### Filtering IRF to only display effects of variable shocks on the response of DPZ sales variable.
+```{r}
+par(mfrow=c(2,2))
+plot( irf(var.1, response = "HAS", n.ahead = 24, boot = TRUE,  runs=500) , plot.type = "single")
+```
+
+Impulse Response Functions (IRFs) are used to visualize/trace out how a shock to one variable affects the response of other variables. In this case, the shock is referring to the temporary but extreme sudden change to one variable.
+
+For the purpose of this analysis, the effects of shock to US retail sales or US consumer sentimen on DPZ’s sales will be analyzed. The 3 IRF graphs above shows that shock to consumer sentiment results in sliver of or slight increase in DPZ’ sales in the beginning. However, a shock to US retail sales shows a decline in DPZ’s sales and keeps it at a downward trend for the later period.
+
+This section will specifically examine the effects that a shock to US Disposable Personal Income, US Retail Sales: Hobby/Toys/Game Stores has on Hasbro’s quarterly sales. The IRF graphs in the 3 graphs right above this analysis will be analyzed. From the IRF graphs, its evident that a shock to US Retail Sales: Hobby/Toys/Game Stores will produce a slight decrease in Hasbro’s sales in the preceding quarters. The gradual decrease from the shock continues over the time horizon which ultimately declines below the 0 level. 
+
+#### Forecast Error Variance Decomposition (FEVD) will be determined
+```{r}
+fevd(var.1, n.ahead = 16)
+```
+
+Forecast Error Variance Decomposition (FEVD) is another way of analyzing the dynamic interaction that happens between the variables. To put it simply, FEVD shows how much of one variable’s s-step forecast error variance is due to the other variables.
+
+The FEVD results above shows that US Disposable Personal Income (DPI) explains very little, to non existent in regards to the forecast error variances of US Retail Sales: Hobby/Toys/Game Stores (HTG) and Hasbro’s sales (HAS). In addition, US Retail Sales: Hobby/Toys/Game Stores (HTG) explains very little in regards to forecast error variances of US Disposable Personal Income (from 0.29%-3.6% in last period 16) and Hasbro quarterly sales (from 0%-13.9% in period 16). Finally, HAS explains little in regards to DPI (1%-14.9% in period 16) and HTG (19.9%-15.6% in period 16).
+
+In addition to the data analysis, different forecasting approaches/methods will be performed and analyzed to determine which method produces the most accurate measures based on accuracy metrics. This procedure will be done in the following section below.
+
+#### Forecasting Hasbro’s revenue using VAR model, also finding out the accuracy measure of the model
+```{r}
+# VAR method, forecasting period n.ahead = 13, same as the test data length
+forecastVAR = predict(var.1, n.ahead = 13)
+plot(forecastVAR)
+print(forecastVAR)
+```
+
+```{r}
+exp (forecastVAR$fcst$HAS[,2])
+```
+
+
+```{r}
+accuracy(exp (forecastVAR$fcst$HAS[,2]), exp (testVAR[,2]) )
+```
+
+## Forecasting Method Analysis – Comparing Different Forecast Models Based on Accuracy Metrics 
+
+#### Data ranges for training and testing must be defined for forecasting purposes. There is total of 67 observations. For training purposes, 80% of the data will be used, which is 54 observations spanning from 2003 Q1 - 2016 Q2. Then, 20% of the data will be used for testing purposes, which is 13 observations spanning rom 2016 Q3 - 2019 Q3.
+```{r}
+train <- window(y,start=c(2003, 1),end=c(2016, 2))
+print(train)
+plot (train)
+
+test <- window(y, start=c(2016,3),end=c(2019, 3))
+print(test)
+both <- window(y,start=c(2003, 1))
+h=length(test)
+```
+
+#### Now, using the benchmark methods (Average, Naive, Seasonal Naive, Drift), forecast of Hasbro Quarterly Sales will be done
+```{r}
+# Average
+forecast1 <- meanf(train, h=h)
+forecast(forecast1)
+```
+
+```{r}
+# Naïve
+forecast2 <- naive(train, h=h)
+forecast(forecast2)
+```
+
+```{r}
+# Seasonal Naïve
+forecast3 <- snaive(train, h=h)
+forecast(forecast3)
+```
+
+```{r}
+# RW with Drift
+forecast4 <- rwf(train, h=h, drift=TRUE)
+forecast(forecast4)
+```
+
+```{r}
+p1 = autoplot(y) + autolayer(test) + autolayer(forecast1, series="Average", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast - Average") + guides(colour=guide_legend(title="Legend"))
+
+p2 = autoplot(y) + autolayer(test) + autolayer(forecast2, series="Naïve", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast - Naïve") + guides(colour=guide_legend(title="Legend"))
+
+p3 = autoplot(y) + autolayer(test) + autolayer(forecast3, series="Seasonal Naïve", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast - Seasonal Naïve") + guides(colour=guide_legend(title="Legend"))
+
+p4 = autoplot(y) + autolayer(test) + autolayer(forecast4, series="RW with Drift", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast - Drift") + guides(colour=guide_legend(title="Legend"))
+
+gridExtra::grid.arrange(p1, p2, nrow=2)
+```
+
+```{r}
+gridExtra::grid.arrange(p3, p4, nrow=2)
+```
+
+The above 4 plots show the four benchmark forecasting methods – Average, Naïve, Seasonal Naïve, RW with Drift method what was applied to the dataset. As mentioned previously, these simple techniques are used as point of reference or in comparison to the advanced forecasting methods in the later section of the report. By comparing the 2 methodology, the effectiveness of the models can be determined depending on their performance. 
+From analysis of the 4 benchmark methods, its clear that the seasonal naïve method does the best job out of all 4 methodologies displayed above. This is due to the fact that seasonal naïve is the only method that was able to capture the seasonality present within the dataset while the other 3 methods did not account for seasonality at all. The second best method would be RW with drift method as it was able to capture the slight upward trend within the data whereas the Average and Naïve methods did not capture any seasonality or trend – its just a straight line. 
+
+#### Advanced forecasting methods
+```{r}
+# simple exponential moving average method
+forecast5 <- ses(train, h = h)
+forecast(forecast5)
+```
+
+```{r}
+# HW linear trend method
+forecast6 <- holt(train,  h=h)
+forecast(forecast6)
+```
+
+```{r}
+# HW exponential trend method (CANT FIND FIT)
+#forecast7 <- holt(train, exponential=TRUE, h=h)
+#forecast(forecast7)
+```
+
+```{r}
+# HW damped trend method
+forecast8 <- holt(train, damped=TRUE, h=h)
+forecast(forecast8)
+```
+
+```{r}
+# HW seasonal method - multiplicative
+forecast9 <- hw(train, seasonal="multiplicative", h=h)
+forecast(forecast9)
+```
+
+```{r}
+# HW seasonal method - additive
+forecast10 <- hw(train, seasonal="additive", h=h)
+forecast(forecast10)
+```
+
+```{r}
+# HW damped trend method - multiplicative
+forecast11 <- hw(train, damped=TRUE, seasonal="multiplicative", h=h)
+forecast(forecast11)
+```
+
+```{r}
+# HW damped trend method - additive
+forecast12 <- hw(train, damped=TRUE, seasonal="additive", h=h)
+forecast(forecast12)
+```
+
+```{r}
+# trend plus seasonal method(TLSM)
+fit.tsHAS <- tslm(train ~ trend + season)
+forecast13 = forecast(fit.tsHAS,h=h)
+forecast(forecast13)
+```
+
+```{r}
+# ETS 
+fit.etsHAS <- ets(train, model="ZZZ")
+forecast14 <- forecast(fit.etsHAS, h=h)
+forecast(forecast14)
+```
+
+```{r}
+# STL
+fit.stlHAS <- stl(train, t.window=15, s.window="periodic", robust=TRUE)
+forecast15 <- forecast(fit.stlHAS, method="rwdrift",h=h)
+forecast(forecast15)
+```
+
+```{r}
+# ARIMA
+fit.arimaHAS <- auto.arima(train)
+forecast16 <- forecast(fit.arimaHAS, h=h)
+forecast(forecast16)
+```
+
+```{r}
+#### TBATS model
+fit.tbatsHAS <- tbats(train)
+forecast17 <- forecast(fit.tbatsHAS, h=h)
+forecast(forecast17)
+```
+
+```{r}
+#### NNETAR model
+fit.nnetarHAS <- nnetar(train, PI=TRUE, lambda=0)
+forecast18 <- forecast(fit.nnetarHAS, h=h)
+forecast(forecast18)
+```
+
+
+#### Plots for the advanced models 
+```{r}
+p5 = autoplot(y) + autolayer(test) + autolayer(forecast5, series="Simple Exponential Moving Average Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-Simple Exponential Moving Average Method") + guides(colour=guide_legend(title="Legend"))
+
+p6 = autoplot(y) + autolayer(test) + autolayer(forecast6, series="HW Linear Trend Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-HW Linear Trend Method") + guides(colour=guide_legend(title="Legend"))
+
+#p7 = autoplot(y) + autolayer(test) + autolayer(forecast7, series="HW Exponential Trend Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-HW Exponential Trend Method") + guides(colour=guide_legend(title="Legend")) (CANT FIND FIT)
+
+p8 = autoplot(y) + autolayer(test) + autolayer(forecast8, series="HW Damped Trend Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-HW Damped Trend Method") + guides(colour=guide_legend(title="Legend"))
+
+p9 = autoplot(y) + autolayer(test) + autolayer(forecast9, series="HW Seasonal Method-Multiplicative", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-HW Seasonal Method-Multiplicative") + guides(colour=guide_legend(title="Legend"))
+
+p10 = autoplot(y) + autolayer(test) + autolayer(forecast10, series="HW Seasonal Method-Additive", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-HW Seasonal Method-Additive") + guides(colour=guide_legend(title="Legend"))
+
+p11 = autoplot(y) + autolayer(test) + autolayer(forecast11, series="HW Damped Trend Method-Multiplicative", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-HW Damped Trend Method-Multiplicative") + guides(colour=guide_legend(title="Legend"))
+
+p12 = autoplot(y) + autolayer(test) + autolayer(forecast12, series="HW Damped Trend Method-Additive", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-HW Damped Trend Method-Additive") + guides(colour=guide_legend(title="Legend"))
+
+p13 = autoplot(y) + autolayer(test) + autolayer(forecast13, series="Trend Plus Seasonal Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-Trend Plus Seasonal Method") + guides(colour=guide_legend(title="Legend"))
+
+p14 = autoplot(y) + autolayer(test) + autolayer(forecast14, series="STL Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-STL Method") + guides(colour=guide_legend(title="Legend"))
+
+p15 = autoplot(y) + autolayer(test) + autolayer(forecast15, series="ETS Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-ETS Method") + guides(colour=guide_legend(title="Legend"))
+
+p16 = autoplot(y) + autolayer(test) + autolayer(forecast16, series="ARIMA Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-ARIMA Method") + guides(colour=guide_legend(title="Legend"))
+
+p17 = autoplot(y) + autolayer(test) + autolayer(forecast17, series="TBATS Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-TBATS Method") + guides(colour=guide_legend(title="Legend"))
+
+p18 = autoplot(y) + autolayer(test) + autolayer(forecast18, series="NNETAR Method", PI=FALSE) + xlab("Year") + ylab("$ Millions USD") + ggtitle("Hasbro Quarterly Sales Forecast-NNETAR Method") + guides(colour=guide_legend(title="Legend"))
+```
+
+```{r}
+gridExtra::grid.arrange(p5, p6, nrow=2)
+```
+
+```{r}
+gridExtra::grid.arrange(p8, p9, nrow=2)
+```
+
+```{r}
+gridExtra::grid.arrange(p10, p11, nrow=2)
+```
+
+```{r}
+gridExtra::grid.arrange(p12, p13, nrow=2)
+```
+
+```{r}
+gridExtra::grid.arrange(p14, p15, nrow=2)
+```
+
+```{r}
+gridExtra::grid.arrange(p16, p17, nrow=2)
+```
+
+```{r}
+gridExtra::grid.arrange(p18, nrow=1)
+```
+
+#### Calculating accuracy measures ordered by MASE values 
+```{r}
+a1 = accuracy(forecast1,test)
+a2 = accuracy(forecast2,test)
+a3 = accuracy(forecast3,test)
+a4 = accuracy(forecast4,test)
+a5 = accuracy(forecast5,test)
+a6 = accuracy(forecast6,test)
+#a7 = accuracy(forecast7,test) (UNABLE TO FIND FIT)
+a8 = accuracy(forecast8,test)
+a9 = accuracy(forecast9,test)
+a10 = accuracy(forecast10,test)
+a11 = accuracy(forecast11,test)
+a12 = accuracy(forecast12,test)
+a13 = accuracy(forecast13,test)
+a14 = accuracy(forecast14,test)
+a15 = accuracy(forecast15,test)
+a16 = accuracy(forecast16,test)
+a17 = accuracy(forecast17,test)
+a18 = accuracy(forecast18,test)
+
+a.table<-rbind(a1, a2, a3, a4, a5, a6, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)
+
+row.names(a.table)<-c('Average Training', 'Average Test', 'Naïve Training', 'Naïve Test', 'Seasonal Naïve Training', 'Seasonal Naïve Test', 'Drift Training', 'Drift Test', 'Simple Exponential Moving Average Training', 'Simple Exponential Moving Average Test', 'HW Linear Trend Method Training', 'HW Linear Trend Method Test', 'HW Damped Trend Method Training', 'HW Damped Trend Method Test', 'HW Seasonal Method-Multiplicative Training', 'HW Seasonal Method-Multiplicative Test', 'HW Seasonal Method-Additive Training', 'HW Seasonal Method-Additive Test', 'HW Damped Trend Method-Multiplicative Training', 'HW Damped Trend Method-Multiplicative Test', 'HW Damped Trend Method-Additive Training', 'HW Damped Trend Method-Additive Test', 'Trend Plus Seasonal Method Training', 'Trend Plus Seasonal Method Test', 'STL Method Training', 'STL Method Test', 'ETS Method Training', 'ETS Method Test', 'ARIMA Method Training', 'ARIMA Method Test', 'TBATS Method Training', 'TBATS Method Test', 'NNETAR Method Training', 'NNETAR Method Test')
+
+a.table<-as.data.frame(a.table)
+a.table<-a.table[order(a.table$MASE),]
+
+a.table %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+#### VAR accuracy measures calculated from above
+```{r}
+a19 = accuracy(exp (forecastVAR$fcst$HAS[,2]), exp (testVAR[,2]) )
+a19 %>% kable() %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+From the accuracy measure table above, its clear that the ARIMA model has the highest accuracy/best fits the training set data for the Hasbro Quarterly Sales Data. This is evident from the fact that ARIMA model has produced the lowest MASE value of 0.6890539 when compared to other model/methods. Its also worth noting that ARIMA model has the lowest values for RMSE, MAE, and MAPE accuracy metrics. While its clear that ARIMA model is the best fitting model for the training data set, HW Damped Trend Method-Multiplicative model follows the ARIMA model as the second best fitting model, and HW Seasonal Method-Multiplicative model being third based on the MASE values. Its important to note that the top training set methods are close in value with each other, with MASE values not really part apart from each other - HW Damped Trend Method-Multiplicative MASE (0.7158974), HW Seasonal Method-Multiplicative MASE (0.7222230).
+
+The story is different for the test set as the model that best fits the test sets range of observations is the HW Damped Trend Method-Multiplicative model/method. This is due to the fact that HW Damped Trend Method-Multiplicative method has the lowest MASE value at 1.4343324 for test set data, and the lowest RMSE, MAE, MAPE accuracy measures for the test set. Its interesting to note that HW Damped Trend Method-Multiplicative model was also the second best fitting model for the training set data, close behind ARIMA. The second-best fitting model for the test set is the HW Damped Trend Method-Additive method as it has the second lowest values for the 4-accuracy metrics mentioned previously. Its important to note that both HW methods were chosen as the best fitting model for the test set. This is likely due to the fact that HW method is used to capture seasonality within the data, and its most effective when time series is seasonal – which is the case for Hasbro quarterly sales data analyzed in the report. 
+
+In terms of the worst fitting models, the accuracy metric table shows that the Naive method has the lowest degree of fit for training and test set. This is due to the Naive method generating the highest values in error metrics such as RMSE, MAE, MAPE, and MASE in comparison to the other methods for the training and test set. In addition, its important to note that the VAR model’s accuracy measures were provided as NaN and Inf.
+
+#### Next, we will use the best fitting test set model to generate forecasts for the upcoming 2 years (2019 Q4 - 2021 Q4, 9 periods ahead). From our analysis in the previous section, it was determined that the  methHW damped trend method - multiplicative produced the most optimal test set fit, and thus, will be used for this forecast.
+```{r}
+# HW damped trend method - multiplicative
+fcast.HW.future <- hw(y, damped=TRUE, seasonal="multiplicative", h=h)
+forecast.HW <- forecast(fcast.HW.future, h=9)
+forecast(forecast.HW)
+```
+
+```{r}
+autoplot(forecast.HW) +
+  ggtitle("HAsbro Quarterly Sales Forecast - HW damped trend method multiplicative") +
+  xlab("Year") + ylab("$ Millions USD")
+```
+  
+#### In order to confirm that HW damped trend method - multiplicative is the most optimal forecasting method, time series cross validation will be applied to all the models from above. The forecast horizon will be 6 periods and the window length will be 50 observations. To begin, we must establish code to retrieve forecast objects from the methods above. 
+```{r}
+# Average method
+faverageTS <- function(x, h) {forecast(meanf(x), h = h)}
+
+# Naïve method
+fnaiveTS <- function(x, h) {forecast(naive(x), h = h)}
+
+# Seasonal Naïve method
+fsnaiveTS <- function(x, h) {forecast(snaive(x), h = h)}
+
+# RW with Drift method
+frwdTS <- function(x, h){forecast(Arima(x, order=c(0,1,0), include.drift=TRUE), h=h)}
+
+# Simple Exponential Moving Average method
+fsemaTS <- function(x, h) {forecast(ses(x), h = h)}
+
+# HW Linear Trend method
+fhwltTS <- function(x, h) {forecast(holt(x), h = h)}
+
+# HW Damped Trend method
+fhwdtTS <- function(x, h) {forecast(holt(x, damped=TRUE), h = h)}
+
+# HW Seasonal method - Multiplicative
+fhwsmTS <- function(x, h) {forecast(holt(x, seasonal="multiplicative"), h = h)}
+
+# HW Seasonal method - Additive
+fhwsaTS <- function(x, h) {forecast(holt(x, seasonal="additive"), h = h)}
+
+# HW Damped Trend method - Multiplicative
+fhwdtmTS <- function(x, h) {forecast(holt(x, damped=TRUE, seasonal="multiplicative"), h = h)}
+
+# HW Damped Trend method - Additive
+fhwdtaTS <- function(x, h) {forecast(holt(x, damped=TRUE, seasonal="additive"), h = h)}
+
+# Trend Plus Seasonal method
+ftslmTS <- function(x, h) {forecast(tslm(x ~ trend + season), h = h)}
+
+# STL method
+fstlTS <- function(x, h) {forecast(stl(x, t.window=15, s.window="periodic", robust=TRUE), method="rwdrift", h = h)}
+
+# ETS method
+fetsTS <- function(x, h) {forecast(ets(x), h = h)}
+
+# ARIMA method
+farimaTS <- function(x, h) {forecast(auto.arima(x), h=h)}
+
+# TBATS method
+ftbatsTS <- function(x, h) {forecast(tbats(x), h = h)}
+
+# NNETAR method
+fnnetarTS <- function(x, h) {forecast(nnetar(x, lambda=0), h = h)}
+
+# VAR method
+fvarTS <- function(x, h) {forecast(VAR(x, p=1, type = "both", season =4), h = h)}
+```
+  
+#### Then, must compute the CV errors for the models 
+```{r}
+# Average method
+e1 <- tsCV(y, faverageTS, h=6, window = 50)
+
+# Naïve method
+e2 <- tsCV(y, fnaiveTS, h=6, window = 50)
+
+# Seasonal Naïve method
+e3 <- tsCV(y, fsnaiveTS, h=6, window = 50)
+
+# Drift method
+e4 <- tsCV(y, fdriftTS, h=6, window = 50)
+
+# Simple Exponential Moving Average method
+e5 <- tsCV(y, fsemaTS, h=6, window = 50)
+
+# HW Linear Trend method
+e6 <- tsCV(y, fhwltTS, h=6, window = 50)
+
+# HW Damped Trend method
+e8 <- tsCV(y, fhwdtTS, h=6, window = 50)
+
+# HW Seasonal method - Multiplicative
+e9 <- tsCV(y, fhwsmTS, h=6, window = 50)
+
+# HW Seasonal method - Additive
+e10 <- tsCV(y, fhwsaTS, h=6, window = 50)
+
+# HW Damped Trend method - Multiplicative
+e11 <- tsCV(y, fhwdtmTS, h=6, window = 50)
+
+# HW Damped Trend method - Additive
+e12 <- tsCV(y, fhwdtaTS, h=6, window = 50)
+
+# Trend Plus Seasonal method
+e13 <- tsCV(y, ftpsTS, h=6, window = 50)
+
+# STL method
+e14 <- tsCV(y, fstlTS, h=6, window = 50)
+
+# ETS method
+e15 <- tsCV(y, fetsTS, h=6, window = 50)
+
+# ARIMA method
+e16 <- tsCV(y, farimaTS, h=6, window = 50)
+
+# TBATS method
+e17 <- tsCV(y, ftbatsTS, h=6, window = 50)
+
+# NNETAR method
+e18 <- tsCV(y, fnnetarTS, h=6, window = 50)
+
+# VAR method
+e19 <- tsCV(y, fvarTS, h=6, window = 50)
+```
+  
+#### Calculating MSE values for all the models in each of the 6 periods
+```{r}
+# Average method
+mse.average = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.average[j] = mean(e1[,j]^2, na.rm=TRUE)
+  print(mse.average[j])
+}
+
+# Naïve method
+mse.naive = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.naive[j] = mean(e2[,j]^2, na.rm=TRUE)
+  print(mse.naive[j])
+}
+
+# Seasonal Naïve method
+mse.snaive = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.snaive[j] = mean(e3[,j]^2, na.rm=TRUE)
+  print(mse.snaive[j])
+}
+
+# Drift method
+mse.drift = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.drift[j] = mean(e4[,j]^2, na.rm=TRUE)
+  print(mse.drift[j])
+}
+
+# Simple Exponential Moving Average method
+mse.sema = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.sema[j] = mean(e5[,j]^2, na.rm=TRUE)
+  print(mse.sema[j])
+}
+
+# HW Linear Trend method
+mse.hwlt = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.hwlt[j] = mean(e6[,j]^2, na.rm=TRUE)
+  print(mse.hwlt[j])
+}
+
+# HW Damped Trend method
+mse.hwdt = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.hwdt[j] = mean(e8[,j]^2, na.rm=TRUE)
+  print(mse.hwdt[j])
+}
+
+# HW Seasonal method - Multiplicative
+mse.hwsm = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.hwsm[j] = mean(e9[,j]^2, na.rm=TRUE)
+  print(mse.hwsm[j])
+}
+
+# HW Seasonal method - Additive
+mse.hwsa = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.hwsa[j] = mean(e10[,j]^2, na.rm=TRUE)
+  print(mse.hwsa[j])
+}
+
+
+# HW Damped Trend method - Multiplicative
+mse.hwdtm = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.hwdtm[j] = mean(e11[,j]^2, na.rm=TRUE)
+  print(mse.hwdtm[j])
+}
+
+# HW Damped Trend method - Additive
+mse.hwdta = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.hwdta[j] = mean(e12[,j]^2, na.rm=TRUE)
+  print(mse.hwdta[j])
+}
+
+# Trend Plus Seasonal method
+mse.tps = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.tps[j] = mean(e13[,j]^2, na.rm=TRUE)
+  print(mse.tps[j])
+}
+
+# STL method
+mse.stl = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.stl[j] = mean(e14[,j]^2, na.rm=TRUE)
+  print(mse.stl[j])
+}
+
+# ETS method
+mse.ets = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.ets[j] = mean(e15[,j]^2, na.rm=TRUE)
+  print(mse.ets[j])
+}
+
+# ARIMA method
+mse.arima = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.arima[j] = mean(e16[,j]^2, na.rm=TRUE)
+  print(mse.arima[j])
+}
+
+# TBATS method
+mse.tbats = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.tbats[j] = mean(e17[,j]^2, na.rm=TRUE)
+  print(mse.tbats[j])
+}
+
+# NNETAR method
+mse.nnetar = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.nnetar[j] = mean(e18[,j]^2, na.rm=TRUE)
+  print(mse.nnetar[j])
+}
+
+# VAR method
+mse.var = c(1,2,3,4,5,6)
+for (j in c(1,2,3,4,5,6)){
+  mse.var[j] = mean(e19[,j]^2, na.rm=TRUE)
+  print(mse.var[j])
+}
+```
+
+#### tsCV accuracy measures 
+```{r}
+a.table.accuracy<-rbind(mse.average, mse.naive, mse.snaive, mse.drift, mse.sema, mse.hwlt, mse.hwdt, mse.hwsm, mse.hwsa, mse.hwdtm, mse.hwdta, mse.tps, mse.stl, mse.ets, mse.arima, mse.tbats, mse.nnetar, mse.var)
+
+row.names(a.table.accuracy)<-c('Average MSE', 'Naïve MSE', 'Seasonal Naïve', 'Drift MSE', 'Simple Exponential Moving Average MSE', 'HW Linear Trend MSE', 'HW Damped Trend MSE', 'HW Seasonal - Multiplicative MSE', 'HW Seasonal - Additive MSE', 'HW Damped Trend - Multiplicative MSE', 'HW Damped Trend - Additive MSE', 'Trend Plus Seasonal MSE', 'STL MSE', 'ETS MSE', 'ARIMA MSE', 'TBATS MSE', 'NNETAR MSE', 'VAR MSE')
+
+a.table.accuracy<-as.data.frame(a.table.accuracy)
+
+a.table.accuracy %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+Analysis of the MSE values provides an interesting result. For the first 2 periods (H=1 and H=2), the TBATS model produced the lowest MSE values at 8727.572 for period 1 and 8953.908 for period 2. However, on period 3 (H=3) the ETS model produced the lowest MSE value at 11967.14. Then, in period 4 (H=4) Naïve and Seasonal Naïve method shares similar lowest MSE value at 15863.50. then, seasonal Naïve method from H=5 onwards has the lowest MSE values. These results are likely due to the fact that differing models are able to capture seasonality present in the data better over the time horizon.
+
+On the other hand, Naïve model produced the highest MSE values for periods 1-3 (291884.294, 565791.188, 255592.60 respectively), making it the worst fitting model in the period/horizon 1-3. Then in period 4, Average method has the highest MSE at 203077.53. From period 5 and onwards, Naïve again has the highest MSE values – making it the worst fitting model for the periods 5-6. 
+
+Therefore, the best fitting model for periods H=1, and H=2 is the TBATS model. While the best fitting for periods H=3 is ETS model. For H=4, Naïve and Seasonal Naïve models have the best fit. Lastly, for period H=6, Seasonal Naïve has the lowest MSE value and is the best fitting model. 
+
+#### Plots of the MSE values  
+```{r}
+# Average
+mse.tslm.plot <- colMeans(e1^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for Average method")
+
+# Naive method
+mse.tslm.plot <- colMeans(e2^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for Naive method")
+  
+# Seasonal Naive method
+mse.tslm.plot <- colMeans(e3^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for Seasonal Naive method")
+
+# Simple Exponential Moving Average method
+mse.tslm.plot <- colMeans(e5^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for Simple Exponential Moving Average method")
+  
+# HW Linear Trend method
+mse.tslm.plot <- colMeans(e6^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for HW Linear Trend method")
+
+# HW Damped Trend method
+mse.tslm.plot <- colMeans(e8^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for HW Damped Trend method")
+  
+# HW Seasonal method - Multiplicative
+mse.tslm.plot <- colMeans(e9^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for HW Seasonal method - Multiplicative")
+  
+# HW Seasonal method - Additive
+mse.tslm.plot <- colMeans(e10^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for HW Seasonal method - Additive")
+  
+# HW Damped Trend method - Multiplicative
+mse.tslm.plot <- colMeans(e11^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for HW Damped Trend method - Multiplicative")
+  
+# HW Damped Trend method - Additive
+mse.tslm.plot <- colMeans(e12^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for HW Damped Trend method - Additive")
+  
+# STL method
+mse.tslm.plot <- colMeans(e14^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.tslm.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for STL method")
+  
+# ETS method
+mse.ets.plot <- colMeans(e15^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.ets.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for ETS Method")
+  
+# ARIMA method
+mse.arima.plot <- colMeans(e16^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.arima.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for ARIMA Method")
+  
+# TBATS method
+mse.arima.plot <- colMeans(e17^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.arima.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for TBATS method")
+  
+# NNETAR method
+mse.arima.plot <- colMeans(e18^2, na.rm = T)
+data.frame(h = 1:6, MSE = mse.arima.plot) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point() + ggtitle("MSE Values for NNETAR method")
+```
+  
+tsCV analysis: After plotting the MSE values against the forecast periods that goes up to 6 periods, it can be observed that there is clear upward trend in all of the plots for the models above. This shows that as forecast horizon increases, the error value MSE will also increase. Such phenomenon is understandable as the accuracy and the reliability of the model decreases as time horizon expands and forecasts more into the future. While there are dips in MSE plots above evident in models such as STL, the MSE values increase back up higher in the preceding periods 5 and 6 – proving that error value MSE will increase with the time horizon increasing. 
+
+#### Using the TBATS model generate forecasts for the upcoming 2 years (2019 Q4 - 2021 Q4, 9 periods ahead). From our analysis of MSE values, it was evident that TBATS model had the lowest MSE values when compared .
+```{r}
+# HW damped trend method - multiplicative
+fcast.TBATS.future <- tbats(y)
+forecast.TBATS <- forecast(fcast.TBATS.future, h=9)
+forecast(forecast.TBATS)
+```
+
+```{r}
+autoplot(forecast.TBATS) +
+  ggtitle("HAsbro Quarterly Sales Forecast - TBATS method") +
+  xlab("Year") + ylab("$ Millions USD")
+```
+  
+## Research Findings 
+From this research paper, there are many insights can be learned. The main thing to point out is that Hasbro’s quarterly sales display extreme seasonality which comprises of low sales in Q1 and Q2 that suddenly spikes up in Q3 and slightly decreases in Q4. This seasonal pattern has been apparent all throughout the 15 years worth of Hasbro’s quarterly sales data. In addition, there has been a slight increase in sales trend for Hasbro that is consistent throughout the 15 year period with a spike in sales between 2017-2018. The slight increase in sales trend may be due to many factors such as popularity of Hasbro’s products such as Nerf and their expansion into international emerging markets where the revenues have been increasing since 2012 and has lasted since. As explained previously, the sudden spike in sales between 2017-2018 is likely due to the Paramount partnership that Hasbro signed to produce popular move franchise products such as Iron man for the holiday season. Based on the forecasts and analysis, this slight upward trend in sales will likely continue.
+
+Disclaimer: at the time of writing this research report, Covid-19 has reached a Pandemic status – significantly impacting global supply chains that Hasbro relies upon along with sever decrease in consumer spending. Issac Larian, CEO of privately held toy maker MGA entertainment expects the toy industry sales to fall 6% upwards to 8% in 2020. As a result, the 2020 sales result will likely not display the slight upward trend that has been analyzed in the Hasbro quarterly sales data. Instead, the 2020 sales figure will see a dip due to an unprecedented event. 
+
+Additionally, the research report found that despite the earlier investigation into whether there is a strong correlation between Hasbro’s quarterly sales, US retail sales: Hobby/Toys/Game stores, and US Disposable Income – it found that there wasn’t a strong correlation. This is likely due to the fact that US retail sales data shows a seasonality pattern that is slightly different from the one seen in Hasbro’s quarterly sales data. As mentioned before, Hasbro’s sales pattern consists of low sales in Q1 – Q2, which then spikes up in Q3 which maintains/slightly decreases in Q4. However, US retail sales: Hobby/Toys/Game Stores data pattern showed that Q1 – Q3 sales were very low which sees a huge spike in Q4. While both dataset points to the fact that toy sales increase during the holiday season in Q4 (i.e Christmas), Hasbro’s sales experiences an early spike in Q3 which maintains until Q4 while the overall US retail sales for toys only spikes up in Q4. This finding could mean several things. First, Hasbro’s sales are actually outperforming the overall industry as Hasbro has 2 strong quarters of sales (Q3, Q4) while the general industry makes most of its sales only in Q4. This is likely due to the fact that Hasbro has diversified its business into many areas of entertainment such as video games mentioned previously – which sees demand throughout the year as opposed to being concentrated in 1 quarter. In addition, its important to note that while the overall US retail sales data of toys is a good indicator of where the general industry is heading, its not completely suitable for forecasting Hasbro’s quarterly sales data as they both display different patterns within the data. 
+
+The second variable in VAR analysis was US Disposable Income and the report tried to discover whether there was any correlation between disposable income and Hasbro’s sales. The rationale was that if the disposable income of average consumers increases, it will trickle down into the general toy industry in which Hasbro is a leading organization. As a result, Hasbro would benefit from the increase in disposable income. While there was a slight correlation between the 2 variables, it wasn’t a strong correlation as the paper originally anticipated. However, it was important to note that both variables shared a common characteristic of upward trend in the dataset. 
+
+The time series cross validation (tsCV) results confirmed that as time horizon expands (time variable increase), the MSE values will increase. This is due to the fact that as the forecasting period increases, the reliability of the forecast may be impacted. Therefore, the conclusion was made in the tsCV analysis that the more forecast horizons into the future, the accuracy of the forecast will decrease as the period of forecasting increases – which is seen from the increase in MSE value as time increases. However, there were few interesting observations that could be made from the MSE plots in the report where some methods such as STL displayed a dip in MSE value in h=3, and Naïve method displayed a dip in MSE value in h=4. However, the subsequent periods for both methods showed an increase in the MSE value which confirms the original notion that as period of forecasting increases, the accuracy of the model will decrease. 
+Therefore, research into Hasbro’s quarterly sales data revealed that despite strong competition within the toys/entertainment industry, the firm has fared relatively well – displaying a slight upward trend in the sales in last 15 years. Going forward, Hasbro must use the tools and methods in the report to create an accurate forecasting method of its sales in order to better prepare for the uncertainties that lie ahead. By being prepared, it will allow Hasbro to always stay in front of the competition. 
+
+## References
+
+U.S. Census Bureau, Retail Sales: Hobby, Toy, and Game Stores [MRTSSM45112USN], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/MRTSSM45112USN, March 28, 2020.
+
+U.S. Bureau of Economic Analysis, Disposable Personal Income [DSPI], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/DSPI, March 27, 2020.
+
+Feldberg, Isaac. “Hasbro's Toy Box Is Bigger Than Ever With $3.8 Billion Entertainment One Takeover.” Fortune, Fortune, 30 Dec. 2019, fortune.com/2019/12/30/hasbro-entertainment-one-eone-peppa-pig-pj-masks-ricky-zoom-movies-television/.
+
+“Hasbro Data.” Stock Pup, www.stockpup.com/data/?fbclid=IwAR0tVp6LXzr0Lxo3p_dlPNHyrHUJUeuFpjsQHXK4dQ44xxb2qXD5LbDRt5k.
+
+Team, Trefis. “Why Hasbro Stock Has Been Trending Lower.” Forbes, Forbes Magazine, 31 Oct. 2019, www.forbes.com/sites/greatspeculations/2019/10/31/why-hasbro-stock-has-been-trending-lower/#bc9b79043bd5.
+
+“Hasbro, Inc. .” Yahoo Finance, Yahoo, ca.finance.yahoo.com/quote/HAS/chart.
+
+“Hasbro Quarterly Revenue.” YCharts, ycharts.com/.
+
+06, Apr. “Hasbro Touts Top Brands.” Licenseglobal.com, 6 Apr. 2018, www.licenseglobal.com/toys-games/hasbro-touts-top-brands.
+
+“The Impact of Gadgets on Children.” Challenges Media The Impact of Gadgets on Children Comments, 14 July 2018, challengesmedia.com/the-impact-of-gadgets-on-children/.
+
+“Hasbro, Inc.” International Directory of Company Histories, Encyclopedia.com, 3 Apr. 2020, www.encyclopedia.com/social-sciences-and-law/economics-business-and-labor/businesses-and-occupations/hasbro-inc.
+
+Mohamed, Theron. “4 Ways Hasbro, Mattel, and Other Toy Companies Were Whacked by Toys R Us' Bankruptcy | Markets Insider.” Business Insider, Business Insider, 23 Aug. 2019, markets.businessinsider.com/news/stocks/4-ways-hasbro-mattel-toy-stocks-toys-r-us-bankruptcy-2019-8-1028470134.
+
+
