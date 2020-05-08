@@ -1,0 +1,409 @@
+---
+title: "Economic Forecasting - Project 4"
+author: "John Lee"
+output: html_document
+fontsize: 12pt
+---
+
+#### Executive Summary: This report investigates the dynamic interaction between Domino's Pizza quarterly revenue, US consumer sentiment (CS) and US retail sales (retail and food services). Vectore Autoregression (VAR) was preformed on the dataset. In addition, the VAR model was compared against ARIMA, ETS, TBATS, NNETAR model to determine which model has the best forecast accuracy using the accuracy metrics, mainly with MSE. 
+
+### 1) Estimating appropriate vector autoregression (VAR) for this data set. Natural logs of each variable were used, seasonal dummy variables were included. Then, models were compared with a constant model that include a constant and trend. Finally, preferred specification were used to investigate causality, impulse response functions, and forecast error variance decomposition.
+
+#### First, the applicable packages must be loaded
+```{r message=FALSE}
+options(warn=-1)
+library(fpp2)
+library(vars)
+library(dynlm)
+library(car)
+library(knitr)
+library(kableExtra)
+```
+
+#### Import the dataset for interaction between Domino’s Pizza revenue (DPZ) in millions of dollars, US consumer sentiment (CS) and US retail sales (retail and food services) (RS). 
+```{r}
+as4_data.2 <- read.csv("C:/Users/John/Desktop/ECON 4210/Assignment 4/as4_data-2.csv")
+View(as4_data.2)
+```
+
+#### Rename the data for convenience ( DPS = Domino Pizza Sale)
+```{r}
+Domino = as4_data.2
+```
+
+#### Define the data set as time series for R 
+```{r}
+DPS = ts(Domino, start=2002, frequency=4)
+View(DPS)
+```
+
+#### Rename 3 variables for convenience purpose, also plot the 3 variables to visualize the variables.
+```{r}
+x1 = DPS[,"DPZ"]
+x2 = DPS[,"RS"]
+x3 = DPS[,"CS"]
+
+p1 = autoplot(x1) + geom_line(col="black", size=1) + 
+  ggtitle("Domino Pizza Quarterly Revenue - DPZ") +
+  labs(y="Millions of $",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+
+p2 = autoplot(x2) + geom_line(col="black", size=1) + 
+  ggtitle("US Retail sales (retail and food services)") +
+  labs(y="Millions of $",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+
+p3 = autoplot(x3) + geom_line(col="black", size=1) + 
+  ggtitle("US Consumer Sentiment") +
+  labs(y="Index Value",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+
+gridExtra::grid.arrange(p1, p2, p3, nrow=2)
+```
+
+#### Applying Vector Auto Regression (VAR) to examine interaction between Domino Pizza's revenue (DPZ), US retail sales, and US consumer sentiment 
+```{r}
+vardata = log (DPS[,c(4,3,2)])
+nrow(vardata)
+plot(vardata, main = "VAR data", xlab = "")
+```
+
+#### VAR data plot analysis
+From analysis of the VAR data plots above, it can be observed that there is a correlation between US retail sales variable (RS) and Domino's Pizza Quarterly Revenue data (DPZ). This is due to the fact that both plots show upward trend approximately from 2010. The upward trend shared by 2 plots is likely due to the fact that when the overall US retail sales spending (which includes retail and food services spending) rises, the Domino's revenue rises as a result of such overall increase. On the other hand, there seems to be no significant correlation between US comsumer sentiment and the other 2 variables as the graphs dont move in particular direction. 
+
+#### Correlation statistics are caluated and analyzed to delve deeper into the interaction between 3 variables
+```{r}
+cor(DPS[,2:4])
+```
+
+From the correlation statistics above, its apparent that our findings regarding the interaction between 3 variables are confirmed. There is a significant correlation between the 2 variables US retail sales variable (RS) and Domino's Pizza Quarterly Revenue (DPZ) as it shows the correlation value of 0.8515118, showing a strong correlation between the 2 variables. As mentioned preivously, this is likely due to the fact that both variables share upward trend. Comparatively, there is a weak positive correlation between: Domino's quarterly revenus and US consumer sentiment (0.4753155). In addition, there is a weaker positive correlation between US consumer sentiment (CS) and US retai lsales variable (RS) with correlation value of 0.3486902. 
+
+#### Now, the optimal number of lags to be used in the model will be determined. In order to do so, VARselect funciton will be applied to the data set with the maximum amount of lags being fixed at 9. In addition, 2 versions of VARselect function will be applied to compare the models with "constant" to models that include both "constant" and "trend".
+```{r}
+VARselect(vardata, lag.max = 9, type = "both", season=4)
+```
+
+```{r}
+VARselect(vardata, lag.max = 9, type = "const", season=4)
+```
+
+To determing the optimal number of lags, AIC and BIC (or otherwise known as Schwarz Criterion) values from results above are used. From the first VARselect function using type="both", the AIC crtieria suggests a lag of 2 while the BIC criteria suggests lag of 1. On the other hand, in the second VARselect function using type="const", AIC and BIC criterias suggests lag of 1. With discrepency between AIC and BIC in the first VARselect funciton, its usually better to use the lag value given by the BIC criteria since AIC has the tendency to choose large numbers instead of lags. Further tests will be performed to determine the optimal number of lags below. 
+
+#### The roots of the VAR model will be calculated to determine the optimal lag length and the overall fit of the VAR model.
+```{r}
+var.1 = VAR(vardata, p=1, type = "const", season =4)
+summary(var.1)
+```
+
+```{r}
+var.2 = VAR(vardata, p=1, type = "const", season =4)
+summary(var.2)
+```
+
+```{r}
+var.3 = VAR(vardata, p=1, type = "both", season =4)
+summary(var.3)
+```
+
+```{r}
+var.4 = VAR(vardata, p=2, type = "both", season =4)
+summary(var.4)
+```
+
+```{r}
+roots(var.1)
+```
+
+```{r}
+roots(var.2)
+```
+
+```{r}
+roots(var.3)
+```
+
+```{r}
+roots(var.4)
+```
+
+The above calculation was conducted to find the roots of the VAR models in order to determine the VAR model with the best fit. In order to do this, 4 potential roots were calculated: "Const" typed VAR with BIC and AIC suggessted lag of 1 (p=1) which vere var.1 and var. 2 models. In addition, "both" typed VAR with BIC suggested lag value of 1 (var.3) and "both" typed VAR with AIC suggested lag value of 2 (var.4)'s roots were calculated. 
+
+A good fitting VAR model needs to have a root values of characteritics polynomial under the value of 1. From the root calulation results above, its evident that both "const" typed VAR models have values that are above 1 (1.0225627). Since the value is above the polynomial value of 1, it indicatese that the "const" typed VAR models does not representthe best fitting VAr model. Due to "const" types VAR models suboptimal fit, it can be eliminated as it is not the best fitting model. On the other hand, the two "both" typed VAR models have root values that are below 1. Its interesting to note that while "both" models have values of under 1, the root values for BIC suggested model with lag value of p=1 had a lower root value than the AIC suggested model with lag value of p=2 for the first value. Further Portmanteu Test will be used to determine the selection of optimal lag number. 
+
+#### Now, the Portmanteau Test for the lags (BIC lag = 1, AIC lag = 2). The test will only be performed for "both" typed models as it was determined above that the "const" typed models had a suboptimal fit. In addition, there will be 2 types of Portmanteu test performed for the two lags mentioned.
+
+#### BIC-suggested lag (p=1)
+```{r}
+# PT.asymptotic test
+serial.test(var.3, lags.pt = 16, type = "PT.asymptotic")
+```
+
+```{r}
+# PT.adjusted test
+serial.test(var.3, lags.pt = 16, type = "PT.adjusted")
+```
+
+#### AIC-suggested lag (p=2)
+```{r}
+# PT.asymptotic test
+serial.test(var.4, lags.pt = 16, type = "PT.asymptotic")
+```
+
+```{r}
+# PT.adjusted test
+serial.test(var.4, lags.pt = 16, type = "PT.adjusted")
+```
+
+From the Portmanteau tests above, there are several observations to be made. ITs evident that the p-values for "asymptotic" typed Portmanteau test for BIC-based VAR model (p=1, var.3 variable) and the AIC-based VAR model (p=2, var.4 variable) are above 0.05 - which means that there is no serieal correlation up to 16 lags for the "asymptotic" Portmanteau test performed for BIC and AIC VAR models. On the other hand, the "adjusted" typed Portmanteau tests provided p-values for both BIC and AIC VAR models that are lower than 0.05. Now, in order to determine the optimal lag value, the results of Portmanteau tests for AIC and BIC vased VAR models must be done. For hte "asymptotic" types Portmanteau test resuts, the BIC based VAR model (p=1) generated p-value of 0.1652, which is higher than the AIC based VAR model (p=2), which had p-value of 0.1421. In addition, for the "adjusted" typed Portmanteau test results, the BIC based VAR model (p=1) generated p-value of 0.01677 which is higher than the AIC based VAR model (p=2), which had p-value of 0.01102. Therefore, the analysis from now on will be using the VAR model with 1 lag (BIC-suggested). 
+
+#### Using the optimal number of lags determined from above for VAR model (p=1), the residuals will be determined as the randomness in residuals can be used as an indicator to determine whether it is a good fitting VAR model. 
+```{r}
+plot(var.3, names = "DPZ" )
+```
+
+```{r}
+plot(var.3, names = "RS" )
+```
+
+```{r}
+plot(var.3, names = "CS" )
+```
+
+```{r}
+acf(residuals(var.3), type="partial", lag.max=10)
+```
+
+```{r}
+Acf(residuals(var.3)[,"DPZ"], main="ACF of DPZ")
+```
+
+```{r}
+Acf(residuals(var.3)[,"RS"], main="ACF of RS")
+```
+
+```{r}
+Acf(residuals(var.3)[,"CS"], main="ACF of CS")
+```
+
+The plots of residuals for the variables DPZ, RS, and CS shows that the residuals for all 3 variables appear to be random. Therefore, this means that the VAR model wit hah lag 1 suggestd by BIC model is a good fit. 
+
+#### Now, the casuaity among the variables will be investigated using the Granger Test
+```{r}
+causality(var.3, cause= c( "RS" ,"CS" ) )
+```
+
+Granger causality refers to whether or not one variable is useful to forecast the values of another variable - looks at the causality between 2 variables in a time series. In other words, Granger causality can determine whether or not movements in one variable precedes the movement of another variable. The Granger causality tests can be conducted through standard test statitics on the estimated coefficients. The test results will be analyzed below.
+
+The results of Granger Causality null hypothesis states that US retail Sales (RS) and US consumer sentiment (CS) do not Granger-cause DPZ's sales. In order to accept and not reject this null hypothesis, the p=value must be greather than 0.05. However, the p-value of the results indicates that it is 0.004051, which is lower than 0.05. As a result, the null hypothesis must be rejected, and there is enough evidence to support the alternate hypothesis. The alternate hypothesis states that US retail sales and US consumer sentiment DO Granger-cause DPZ's sales. 
+
+The instantaneous null hypothesis states that there is no instantaneous causality between US retail sales, US consumer sentiment and DPZ's sales. Since the p-value under instantaneous null hypothesis is 0.8045, which is greather than 0.05, the instantaneous null hypothesis will not be rejected. This is due to the fact that there is not enought evidence to support the alternate hypothesis which states that there is instantaneous causality between the 3 variables.
+
+In conslusion, the Granger test results show that US retail sales and US consumer sentiment do Granger-cause DPZ's sales. Howether, there is no instantaneous causality between US retail sales, US consumer sentiment, and DPZ's sales. 
+Therefore, from the Granger tests, we can conclude that consumer sentiment and economic policy DO Granger-cause CNR’s sales. 
+
+#### Now, the Impulse Response Functions (IRFs) will be analyzed
+```{r}
+var3.irf <- irf(var.3,  n.ahead = 16, boot = TRUE,  runs=500, seed=99, cumulative=FALSE)
+
+par(mfrow=c(3,3))
+plot(var3.irf, plot.type = "single")
+```
+
+#### Filtering IRF to only display effects of variable shocks on the response of DPZ sales variable. 
+```{r}
+par(mfrow=c(2,2))
+plot( irf(var.3, response = "DPZ", n.ahead = 24, boot = TRUE,  runs=500) , plot.type = "single")
+par(mfrow=c(1,1))
+```
+
+Impuze Response Functions (IRFs) are used to visualize/trace out how a shock to one variable affects the response of other variables. The shock is referring to the temporary but extereme sudden change to one variable. 
+
+For the purpose of this analysis, the effects of shock to US retail sales or US consumer sentimen on DPZ's sales will be analyzed. The 3 IRF graphs above shows that shock to consumer sentiment results in sliver of or slight increase in DPZ' sales in the beginning. However, a shock to US retail sales shows a decline in DPZ's sales and keeps it at a downward trend for the later periods. 
+
+#### Forecast Error Variance Decomposition (FEVD) will be determined 
+```{r}
+fevd(var.3, n.ahead = 16)
+```
+
+Forecast Error Variance Decomposition (FEVD) is another way of analyzing the dynamic interaction that happens between the variables. To put it simply, FEVD shows how much of one variable's s-step forecast error variance is due to the other variables. 
+
+The FEVD results above shows that US retail sales explains very little, to non existant in regards to the forecast error variances of US consumer sentiment and DPZ's sales. In addition, US consumer sentiment explains very little in regards to the forecast error variances of US retail sales (from 8%-10% in last period 16) and DPZ (from 0%-6.5% in last period 16). Finally, the DPZ explains very little in regards to the forecast error variances of US retail sentiment. However, the DPZ explains quite alot for US consumer sentiment as the period increases, eventually reaching 41% in period 16. 
+
+
+### 2) Use the VAR in 1) for forecasting Domino’s Pizza revenue. Use the data from 2002:1 to 2013:4 for training and the data from 2014:1 2019:3 for testing.
+
+#### Setting train, test ranges for VAR model from 1)
+```{r}
+trainvar <- window(vardata,start=c(2002, 1),end=c(2013, 4))
+trainvar
+autoplot(trainvar, facets = TRUE)
+
+testvar <- window(vardata,start=c(2014, 1), end=c(2019, 3))
+bothvar <- window(vardata,start=c(2002, 1))
+h=dim(testvar)[1]
+```
+
+#### Forecasting Domino's revenue using VAR model, also finding out the accuracy measure of the model
+```{r}
+varfc3 = VAR(trainvar, p=1, type = "both", season =4)
+
+var.fc3 = forecast(varfc3, h= h)
+autoplot(var.fc3) + xlab("Year")
+
+var.fc3$forecast$DPZ
+exp (var.fc3$forecast$DPZ$mean)
+
+accuracy(exp (var.fc3$forecast$DPZ$mean), exp (testvar[,3]) )
+```
+
+### 3) Comparing the Domino’s Pizza revenue forecast from 2) with those from an ARIMA, ETS, TBATS, and NNETAR to determine which model forecasts the best.
+
+#### Plotting the Dominos revenue data, bringing it down from above
+```{r}
+autoplot(x1) + geom_line(col="black", size=1) + 
+  ggtitle("Domino's Quarterly Sales Revenue") +
+  labs(y="Amount of Revenue (Millions of USD)",x="Year" ) +
+  theme(plot.title = element_text(size=12, face = "bold") ,
+        axis.text.x = element_text(size=12, face = "bold"),
+        axis.text.y = element_text(size=12, face = "bold"))
+```
+
+#### Setting train, test ranges for ARIMA, ETS, TBATs, NNETAR models
+```{r}
+train <- window(x1,start=c(2002, 1),end=c(2013, 4))
+train
+autoplot(train, facets = TRUE)
+
+test <- window(x1,start=c(2014, 1), end=c(2019, 3))
+both <- window(x1,start=c(2002, 1))
+h=length(test)
+```
+
+#### Generating forecats for Domino's quarterly sales data usin: ARIMA, ETS, TBATS, NNETAR methods. Plots of actual and forecasted values will be provided below. 
+
+#### ARIMA model 
+```{r}
+fit.arima <- auto.arima(train)
+fit1 <- forecast(fit.arima, h=h)
+forecast(fit1)
+```
+
+#### ETS model
+```{r}
+fit.ets <- ets(train, model="ZZZ")
+fit2 <- forecast(fit.ets, h=h)
+forecast(fit2)
+```
+
+#### TBATS model
+```{r}
+fit.tbats <- tbats(train)
+fit3 <- forecast(fit.tbats, h=h)
+forecast(fit3)
+```
+
+#### NNETAR model
+```{r}
+fit.nnetar <- nnetar(train, PI=TRUE, lambda=0)
+fit4 <- forecast(fit.nnetar, h=h)
+forecast(fit4)
+```
+
+#### Plot of each model
+```{r}
+plot1 = autoplot(x1) + autolayer(test) + autolayer(fit1, series="ARIMA", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Domino's Quarterly Sales Forecasts-ARIMA") + guides(colour=guide_legend(title="Legend"))
+
+plot2 = autoplot(x1) + autolayer(test) + autolayer(fit2, series="ETS", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Domino's Quarterly Sales Forecasts-ETS") + guides(colour=guide_legend(title="Legend"))
+
+plot3 = autoplot(x1) + autolayer(test) + autolayer(fit3, series="TBATS", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Domino's Quarterly Sales Forecasts-TBATS") + guides(colour=guide_legend(title="Legend"))
+
+plot4 = autoplot(x1) + autolayer(test) + autolayer(fit4, series="NNETAR", PI=FALSE) + xlab("Year") + ylab("Sales in millions") + ggtitle("Domino's Quarterly Sales Forecasts-NNETAR") + guides(colour=guide_legend(title="Legend"))
+```
+
+#### Plotting ARIMA, ETS model
+```{r}
+gridExtra::grid.arrange(plot1, plot2, nrow =2)
+```
+
+#### Plotting TBATS, NNETAR model
+```{r}
+gridExtra::grid.arrange(plot3, plot4, nrow =2)
+```
+
+```{r}
+a1 = accuracy(fit1, test)
+a2 = accuracy(fit2, test)
+a3 = accuracy(fit3, test)
+a4 = accuracy(fit4, test)
+
+a.table<-rbind(a1, a2, a3, a4)
+
+row.names(a.table)<-c('ARIMA training', 'ARIMA test', 'ETS training', 'ETS test', 'TBATS training', 'TBATS test', 'NNETAR training', 'NNETAR test')
+
+a.table<-as.data.frame(a.table)
+a.table<-a.table[order(a.table$MASE),]
+a.table
+```
+
+#### ARIMA, ETS, TBATS, NNETAR Accuracy Measures in table
+```{r}
+kable(a.table) 
+```
+
+#### VAR model accuracy measures from Question #2
+```{r}
+VARA1=accuracy(exp (var.fc3$forecast$DPZ$mean), exp (testvar[,3]) )
+a.table1<-rbind(VARA1)
+kable(a.table1)
+```
+
+Through the analysis of different models above, the model that can best capture the fluctuations of Domino's quarterly revenue and has the best accuracy measures has to be selected. Hence, through the analysis of the accuracy measures of different models, its evident that the ETS model has the lowest MASE (0.4648062) for the training data set. In addition, the ETS model also has the lowest ME (-0.1321472), RMSE (13.19336), MAE (10.02075), MPE (-0.0909088) and MAPE (2.600289) values.
+
+For the testing dataset, NNETAR model has the lowest MASE value at 
+(5.1115408). In addtion, it also has the lowest value for ME (96.8984582	), RMSE (157.87550), MAE (110.19959), MPE (11.1257133), MAPE (13.732684). With the best accuracy measures, taking a look at the NNETAR plot above shows that while it may not catch the seasonality, it caught the upward trend that was apparent in the Domino's quarterly sales data. Therefore, for testing purposes, NNETAR is the best fitting model.
+
+When the VAR model is compared to other models above, its apprent that it did not have the lowest accuracy measures. In fact, it comes as the second worst fitting model for test data set as it had the second highest accuracy measures with TBATS being the worst/highest accuracy measure model.
+
+Therefore, since the NNETAR model was determined to be the best fitting model for the test data set, it will be used to forecast Domino's pizza revenuew for 2019:4 to 2020:4.
+
+#### Forecasting Domino’s Pizza revenue for 2019:4 to 2020:4.
+```{r}
+fit.nnetar1<- nnetar(x1, lambda=0)
+forecastnnetar1<- forecast(fit.nnetar1, PI=TRUE, h=5)
+forecast(forecastnnetar1)
+```
+
+```{r}
+autoplot(forecastnnetar1) +
+  ggtitle("Domino's Quarterly Sales Forecast") +
+  xlab("Year") + ylab("Quarterly Sales USD in millions)")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
