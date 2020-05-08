@@ -1,0 +1,270 @@
+---
+title: "Economic Forecasting - Project 2"
+author: "John Lee
+output: html_document
+subtitle: Following report uses US nonfarm payroll data from FRED to fit the dataset with Trend + Seasonality using TSLM. In addtion, fourier terms were analyzed, along with forecast and its accuracy.
+fontsize: 12pt
+---
+
+# Using TSLM to fit linear + seasonal component to data - Determining the fit and analyzing residuals 
+
+#### First, the applicable packages must be loaded
+```{r message=FALSE}
+options(warn=-1)
+library(fpp2)
+library(quantmod)
+library(knitr)
+```
+
+#### Next, data set concerning PAYNSA will be loaded in using quantmod
+```{r}
+symbols <- c( "PAYNSA")
+m = length(symbols)
+getSymbols(symbols,src="FRED")
+```
+
+#### Plotting the PAYNSA dataset from FRED
+```{r}
+plot(PAYNSA)
+```
+
+#### Change the name of dataset for convenience and classify the dataset as time series
+```{r}
+UNP = PAYNSA
+NonfarmPay = ts(UNP, start=1939, frequency = 12)
+View(NonfarmPay)
+```
+
+#### Create a named variable 
+```{r}
+y = NonfarmPay[,"PAYNSA"]
+```
+
+#### As we only need to consider data from 2010 to Dec 2017, set a specific range for the data set
+```{r}
+focus <- window(y,start=c(2010, 1), end=c(2017, 12))
+focus
+```
+
+## 1 a) Using tslm to fit a linear trend and seasonal component to the data set. How does the model fit? 
+#### Using tslm to fit a linear trend and seasonal component to the data
+```{r}
+fit.focus <- tslm(focus ~ trend + season)
+summary(fit.focus)
+```
+#### Analysis
+**Summary statistics provided above provides insights that can help us determine whether the model fits well. First of all, the fitted model has an intercept of 1.263e+05 along with standard error of 1.716e+02. These numbers mean that when x=0 (x here referring to the time index, in months frequency), the value of y will be 1.263e+05 (y refers to the US nonfarm payroll). Establishment of the intercept is important to ensure that there are no distortions within the slope coefficient. Speaking of which, the slope coefficient for the fitted model is 1.999e+02 with standard error of 1.642e+00. Since the fitted line has a positive slope, it means that there is a positive relationship between the number of US nonfarm payroll and time. It means that the number of US workers in the economy excluding: proprietors, private household employees, unpaid volunteers, farm employees, unincorporated self-employed has increased over time. Furthermore, the R-Squared value of the fitted model was 0.9949. This refers to the fact that 99.49% of the variation within the number of US nonfarm payroll can be explained by the fitted model. Hence, due to the fact that only 0.51% of the variation cannot be explained by the model, model does a very good job at fitting the dataset.**
+
+#### Visualizaion of fitted linear trend and seasonal model
+```{r}
+autoplot(focus, series="Data") +
+  autolayer(fitted(fit.focus), series="Fitted") +
+  xlab("Year") + ylab("US nonfarm payroll (in thousands of persons)") +
+  ggtitle("US Monthly Total Nonfarm Payroll (in thousands of persons)") 
+```
+
+#### Analysis
+**From observing the time plot above, its clear that the fitted model does a very good job at predicting the number of US nonfarm payroll employment on a montly frequency/basis. Except for periods in 2010, 2013, 2014, there are no notable differences between fitted model and the data itself represtented by their lines.**
+
+```{r}
+cbind(Data = focus,
+      Fitted = fitted(fit.focus)) %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Data, y=Fitted)) +
+  geom_point() +
+  ylab("Fitted (predicted values)") +
+  xlab("Data (actual values)") +
+  ggtitle("US Monthly Total Nonfarm Payroll") +
+  geom_abline(intercept=0, slope=1)
+```
+
+#### Analysis
+**As seen and explained above, the impressive R-Squared number of 0.9949 perfectly makes since in the plot above as the values form almost a perfect line with only few values straying from the goodness of fit.**
+
+## 1 b) Check the residuals of the final model using the checkresiduals() Are you surprised by what the residuals look like?
+
+#### Checking residuals
+```{r}
+checkresiduals(fit.focus)
+```
+#### Residual Analysis
+**The time plot of residuals shows quite an interesting or surprising results. The time plot above shows some changing variation over time but the variations seem to be relatively similar. The intersting part concerns the periods from 2010 to 2012 which shows a stark drop in residuals in the time plot. This is likely due to the 2008 economic recession which would have resulted in lower than usual observations for employment fiures, hence resulting in the residualtime plot above.**
+
+**The ACF autocorrelation plot also displays an interesting feature where it displays positive large values that decline over time. Then, in lag 21, the value drops below 0.0 line and goes negative. This shows that trend is clearly present within data. However, since there are no indications of "scallop" shape, it seems that there is no seasonal pattern within the data.**
+
+**The histogram shows that residuals seem to be relatively evenly distributed with slight skew to the right. This may affect the coverage probability of the prediction intervals.** 
+
+**Surprising fact: From analysis of the 3 plots above along with the R-Squared value, it seems to be a spurious regression. This can be the result of regressing a non stationary time series. Such conclusion was arrived due to the fact that R-Squared value along with high residual autocorrelation are signs of spurious regression. while cases of spurious regression might appear to give reasonalbe short term forecasts, they will generally not continue to work in the future.** 
+
+
+# 2) Fit a harmonic regression with trend to the data in part a). Experiment with changing the number of Fourier terms. Select the appropriate number of Fourier terms to include by minimising the AICc or CV value. How does the model fit? Check the residuals of the final model using the checkresiduals() Are you surprised by what the residuals look like?
+
+## 2 a) Fit harmonic regression with tred to the data in part a) above. Experiment with changing the number of Fourier terms
+```{r}
+fourier.focus1 <- tslm(focus ~ trend + fourier(focus, K=1))
+summary(fourier.focus1)
+```
+```{r}
+fourier.focus2 <- tslm(focus ~ trend + fourier(focus, K=2))
+summary(fourier.focus2)
+```
+```{r}
+fourier.focus3 <- tslm(focus ~ trend + fourier(focus, K=3))
+summary(fourier.focus3)
+```
+```{r}
+fourier.focus4 <- tslm(focus ~ trend + fourier(focus, K=4))
+summary(fourier.focus4)
+```
+```{r}
+fourier.focus5 <- tslm(focus ~ trend + fourier(focus, K=5))
+summary(fourier.focus5)
+```
+```{r}
+fourier.focus6 <- tslm(focus ~ trend + fourier(focus, K=6))
+summary(fourier.focus6)
+```
+#### Analysis
+**In the sections above, experiementation was done on dataset by fitting multiple harmonic regressions with 6 Forier terms. The highest Fourier term used for experimentation is 6 due to the fact that maximum fourier value allowed is determined by K = m/2 where K is the maximum forier term allowed and m = the seasonal period, which is 12 as the it is monthly data. Therefore, the harmonic regressions used Forier terms from 1 all the way until maximum 6. The summary statistics show that R-Squared value rises as Forier term increases.** 
+
+## 2 b) Select the appropriate number of Fourier terms to include by minimising the AICc or CV value. How does the model fit? 
+```{r}
+CV(fourier.focus1)
+```
+```{r}
+CV(fourier.focus2)
+```
+```{r}
+CV(fourier.focus3)
+```
+```{r}
+CV(fourier.focus4)
+```
+```{r}
+CV(fourier.focus5)
+```
+```{r}
+CV(fourier.focus6)
+```
+#### Analysis
+**To select the appropriate number of Fourier terms to include, the model with the lowest AICc or CV value will be selected. From the statistics above, its clear that the optimal/appropriate Forier term to use is K=6. The model with K=6 has the lowest AICc value of 1.188896e+03 while also having the lowest CV value of 2.279336e+05. In addition, it has the highest value for Adjusted R-Squared at 9.941103e-01 compared to other models.** 
+
+#### Fitting the new model with the most optimal Fourier term K=6
+```{r}
+fit.fourier.focus6 <- tslm(focus ~ trend + fourier(focus, K=6))
+summary(fourier.focus6)
+```
+#### Analysis
+**From the summary statistics using the new model with optimal Fourier term K=6, it's evident that the new model has resulted in some improvements. Mainly, the standard error for the intercept has decreased from 1.716e+02/171.6 to 91.541 showing signs of improvement. However, the standard error for the slope coefficient has remained unchanged from the original model. Therefore, harmonic regression model with Fourier term of K=6 shows improvement in fit over the original model.**
+
+```{r}
+autoplot(focus, series="Data") +
+  autolayer(fitted(fit.fourier.focus6), series="Fitted") +
+  xlab("Year") + ylab("US nonfarm payroll (in thousands of persons)") +
+  ggtitle("US Monthly Total Nonfarm Payroll") 
+```
+```{r}
+cbind(Data = focus,
+      Fitted = fitted(fit.fourier.focus6)) %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Data, y=Fitted)) +
+  geom_point() +
+  ylab("Fitted (predicted values)") +
+  xlab("Data (actual values)") +
+  ggtitle("US Monthly Total Nonfarm Payroll") +
+  geom_abline(intercept=0, slope=1)
+```
+
+## 2 c) Check the residuals of the final model using the checkresiduals() Are you surprised by what the residuals look like?
+```{r}
+checkresiduals(fit.fourier.focus6)
+```
+#### Analysis
+**Comparing the original model to the new model with optimal fourier K=6, its apparent that the final residual models seems identical to each oterh. This fact isnt surprising as there is there weren't much significant changes or differences between the two models. The only real changes were the minor change in intercept standard error with no changes in standard error for slope coefficient and adjusted R-Squared.** 
+
+# 3) Using the models from parts a) and b) forecast the PAYNSA series over the period January 2018 to December 2019. To forecast using harmonic regression, you will need to generate the future values of the Fourier terms. 
+
+#### Linear Trend Forecast
+```{r}
+LTforecast <- forecast(fit.focus, h=24)
+
+autoplot(LTforecast) +
+  ggtitle("US Monthly Total Nonfarm Payroll (in thousands of persons)") +
+  xlab("Year") + ylab("US nonfarm payroll (in thousands of persons)")
+```
+```{r}
+forecast(LTforecast)
+```
+
+#### Forecasting using harmonic regression
+```{r}
+HRforecast <- forecast(fit.fourier.focus6, newdata=data.frame(fourier(focus,6,24)))
+
+autoplot(HRforecast) +
+  ggtitle("US Monthly Total Nonfarm Payroll (in thousands of persons)") +
+  xlab("Year") + ylab("US nonfarm payroll (in thousands of persons)")
+```
+```{r}
+forecast(HRforecast)
+```
+
+## 3 b) Compute the forecast accuracy for the linear trend and harmonic regression. Which model fits the best? 
+#### Linear Trend forecast accuracy
+```{r}
+accuracy(LTforecast)
+```
+
+#### Harmonic regression forecast accuracy
+```{r}
+accuracy(HRforecast)
+```
+#### Analysis
+**By analyzing the accuracy of both models, its clear that the 2 models are very similar in fit. This is due to the fact that RMSE, MAE, MAPE, MASE, ACF1 values are exactly identifical.Even the Mean Error (ME) values are the same which means that both models are essentially identifcal when it comes to fit.** 
+
+
+## 3 c) Plot the forecasts of both models along with the actual data. What do you find?
+```{r}
+autoplot(y) +
+  ylab("Number of people employed in US Nonfarm Payroll (in thousdans of persons)") +
+  xlab("Year") +
+  ggtitle("Predictions: US Monthly Total Nonfarm Payroll (in thousands of persons) ") +
+  autolayer(LTforecast, PI = FALSE, series = "Linear Trend Model") +
+  autolayer(HRforecast, PI = FALSE, series = "Harmonic Regression Model") +
+  guides(colour = guide_legend(title = "Forecast Type"))
+```
+
+#### Analysis 
+**From the graph of both models, its evident that the linear trend model and harmonic regression models produce identical forecasts over the period January 2018 to December 2019. Both models seem to perform well when compared to the actual data as both lines (different colors representing differnt model type) are layered right on top of the actual data line, which shows that the forecast models do not stray far off from the actual data itself. In addition, the upward trends are correctly caputured within the 2 models as it shows definite trend upwards, inline with the actual data/data line itself. Overall, its safe to conclude that the models perform well at forecasting number of employemnt of US Nonfarm payroll over the forecast periods. However, its also importnat to note that has time horizon expands further, problems associated with long time horizon forecasting such as increase uncertainties will inevitably effect both models.** 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
